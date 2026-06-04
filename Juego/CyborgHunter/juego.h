@@ -10,6 +10,7 @@ class Juego : public QGraphicsView {
     Q_OBJECT
 private:
     QGraphicsScene *menuEscena;
+    QGraphicsScene *nivelActual;
 
     QMediaPlayer *musicaFondo;
     QAudioOutput *controlAudio;

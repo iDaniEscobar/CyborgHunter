@@ -13,12 +13,14 @@ SOURCES += \
     fisicas.cpp \
     juego.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    nivel2.cpp
 
 HEADERS += \
     fisicas.h \
     juego.h \
-    mainwindow.h
+    mainwindow.h \
+    nivel2.h
 
 FORMS += \
     mainwindow.ui

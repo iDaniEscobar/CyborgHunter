@@ -3,6 +3,8 @@
 #include <QGraphicsProxyWidget>
 #include <QApplication>
 
+#include "nivel2.h"
+
 Juego::Juego(QWidget *parent) : QGraphicsView(parent) {
 
     setFixedSize(1280, 720);
@@ -10,6 +12,7 @@ Juego::Juego(QWidget *parent) : QGraphicsView(parent) {
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     menuEscena = nullptr;
+    nivelActual = nullptr;
 
     musicaFondo = new QMediaPlayer(this);
     controlAudio = new QAudioOutput(this);
@@ -69,9 +72,17 @@ void Juego::iniciarJuego() {
 }
 
 void Juego::iniciarNivel2() {
+    nivelActual = new Nivel2(this);
+
+    setScene(nivelActual);
 
     if (menuEscena) {
         menuEscena->deleteLater();
         menuEscena = nullptr;
     }
+
+    musicaFondo->setSource(QUrl("qrc:/Recursos/Sonidos/Nivel2.mp3"));
+    controlAudio->setVolume(0.4);
+    musicaFondo->setLoops(QMediaPlayer::Infinite);
+    musicaFondo->play();
 }

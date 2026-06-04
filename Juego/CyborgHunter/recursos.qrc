@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file>Recursos/Fondos/Portada.png</file>
         <file>Recursos/Sonidos/Portada.mp3</file>
+        <file>Recursos/Sonidos/Nivel2.mp3</file>
+        <file>Recursos/Fondos/Nivel2.png</file>
     </qresource>
 </RCC>
