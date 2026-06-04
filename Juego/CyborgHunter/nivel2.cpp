@@ -95,7 +95,22 @@ void Nivel2::actualizar() {
         estadoDeMovimiento = 1;
     }
 
+    if (kael->getPosx() < 0) {
+        kael->setPosx(0);
+    }
 
+    if (kael->getPosx() > 1150) {
+        kael->setPosx(1150);
+    }
+
+
+    if (kael->getPosy() < 380) {
+        kael->setPosy(380);
+    }
+
+    if (kael->getPosy() > 570) {
+        kael->setPosy(570);
+    }
     kael->setEstadoActual(estadoDeMovimiento);
     kael->mover();
 }
