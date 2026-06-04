@@ -16,7 +16,8 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     nivel2.cpp \
-    personaje.cpp
+    personaje.cpp \
+    proyectil.cpp
 
 HEADERS += \
     fisicas.h \
@@ -24,7 +25,8 @@ HEADERS += \
     jugador.h \
     mainwindow.h \
     nivel2.h \
-    personaje.h
+    personaje.h \
+    proyectil.h
 
 FORMS += \
     mainwindow.ui

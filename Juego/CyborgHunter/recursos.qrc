@@ -5,5 +5,7 @@
         <file>Recursos/Sonidos/Nivel2.mp3</file>
         <file>Recursos/Fondos/Nivel2.png</file>
         <file>Recursos/Sprites/Jugador.png</file>
+        <file>Recursos/Sprites/Disparo.png</file>
+        <file>Recursos/Sonidos/Laser.mp3</file>
     </qresource>
 </RCC>

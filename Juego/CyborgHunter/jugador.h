@@ -23,11 +23,13 @@ private:
     int velocidadAnimacion;
 
     void cortarHojaSprites();
+
+    bool debeGenerarBala;
 public:
     Jugador(double x, double y);
 
     void mover() override;
-    void disparar();
+    bool disparar();
     void lanzarGranada();
     void activarPoder();
 
@@ -37,6 +39,7 @@ public:
     void setPosy(double y) { posy = y; }
     double getVelocidad() const { return velocidad; }
     void setEstadoActual(int estado) { estadoActual = estado; }
+    int getEstadoActual() const { return estadoActual; }
 };
 
 #endif // JUGADOR_H

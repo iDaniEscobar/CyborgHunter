@@ -1,5 +1,9 @@
 #include "Jugador.h"
 #include <QDebug>
+#include <QGraphicsScene>
+
+class Proyectil;
+class Nivel2;
 
 Jugador::Jugador(double x, double y) : Personaje(x, y, 100, 5.0, ":/Recursos/Sprites/Kael_Quieto.png"){
     chipsRecolectados = 0;
@@ -64,11 +68,35 @@ void Jugador::mover() {
         }
     }
 
+    if (estadoActual == 2) {
+        contadorAnimacion++;
+        if (contadorAnimacion >= velocidadAnimacion) {
+            contadorAnimacion = 0;
+            frameActual++;
+
+            if (frameActual >= framesDisparar.size()) {
+                frameActual = 0;
+                estadoActual = 0;
+
+                debeGenerarBala = true;
+            } else {
+                setPixmap(framesDisparar[frameActual]);
+            }
+        }
+    }
+
     actualizar();
 }
 
-void Jugador::disparar() {
-    qDebug() << "Jugador disparo";
+bool Jugador::disparar() {
+    if (debeGenerarBala) {
+        debeGenerarBala = false;
+        qDebug() << "Jugador disparo";
+        return true;
+    }
+    return false;
+
+
 }
 
 void Jugador::lanzarGranada() {

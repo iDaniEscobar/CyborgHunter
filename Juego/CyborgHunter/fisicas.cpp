@@ -6,8 +6,8 @@ void Fisicas::tiroParabolico(float &x, float &y, float v0, float anguloGrados, f
     float anguloRadianes = anguloGrados * M_PI / 180.0;
     float g = 9.8;
 
-    x = xInicial + (v0 * std::cos(anguloRadianes) * tiempo);
-    y = yInicial - (v0 * std::sin(anguloRadianes) * tiempo) + (0.5 * g * tiempo * tiempo);
+    x = xInicial + (v0 * cos(anguloRadianes) * tiempo);
+    y = yInicial - (v0 * sin(anguloRadianes) * tiempo) + (0.5 * g * tiempo * tiempo);
 }
 
 void Fisicas::resistencia(float &vx, float coeficienteFriccion, float masa, float dt) {
