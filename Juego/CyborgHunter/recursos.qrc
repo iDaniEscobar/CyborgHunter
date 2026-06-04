@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Recursos/Fondos/Portada.png</file>
+        <file>Recursos/Sonidos/Portada.mp3</file>
+    </qresource>
+</RCC>
