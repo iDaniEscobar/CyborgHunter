@@ -6,30 +6,32 @@
 Juego::Juego(QWidget *parent) : QGraphicsView(parent) {
 
     setFixedSize(1280, 720);
-
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+    menuEscena = nullptr;
+
+    musicaFondo = new QMediaPlayer(this);
+    controlAudio = new QAudioOutput(this);
+    musicaFondo->setAudioOutput(controlAudio);
+
+    mostrarPortada();
+}
+
+void Juego::mostrarPortada() {
     menuEscena = new QGraphicsScene(this);
     menuEscena->setSceneRect(0, 0, 1280, 720);
 
     QPixmap imgPortada(":/Recursos/Fondos/Portada.png");
     QPixmap fPortada = imgPortada.scaled(1280, 720, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     menuEscena->setBackgroundBrush(QBrush(fPortada));
+
     setScene(menuEscena);
     construirMenu();
 
-    musicaFondo = new QMediaPlayer(this);
-    controlAudio = new QAudioOutput(this);
-
-    musicaFondo->setAudioOutput(controlAudio);
-
     musicaFondo->setSource(QUrl("qrc:/Recursos/Sonidos/Portada.mp3"));
-
     controlAudio->setVolume(0.4);
-
     musicaFondo->setLoops(QMediaPlayer::Infinite);
-
     musicaFondo->play();
 }
 
@@ -61,5 +63,15 @@ void Juego::construirMenu() {
 void Juego::iniciarJuego() {
     if (musicaFondo) {
         musicaFondo->stop();
+    }
+
+    iniciarNivel2();
+}
+
+void Juego::iniciarNivel2() {
+
+    if (menuEscena) {
+        menuEscena->deleteLater();
+        menuEscena = nullptr;
     }
 }

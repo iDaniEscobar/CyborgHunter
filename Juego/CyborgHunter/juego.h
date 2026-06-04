@@ -19,6 +19,10 @@ private:
 public:
     Juego(QWidget *parent = nullptr);
 
+    void mostrarPortada();
+    void iniciarNivel1();
+    void iniciarNivel2();
+
 public slots:
     void iniciarJuego();
 };
