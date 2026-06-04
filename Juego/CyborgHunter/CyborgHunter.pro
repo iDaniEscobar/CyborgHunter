@@ -12,15 +12,19 @@ CONFIG += c++17
 SOURCES += \
     fisicas.cpp \
     juego.cpp \
+    jugador.cpp \
     main.cpp \
     mainwindow.cpp \
-    nivel2.cpp
+    nivel2.cpp \
+    personaje.cpp
 
 HEADERS += \
     fisicas.h \
     juego.h \
+    jugador.h \
     mainwindow.h \
-    nivel2.h
+    nivel2.h \
+    personaje.h
 
 FORMS += \
     mainwindow.ui
