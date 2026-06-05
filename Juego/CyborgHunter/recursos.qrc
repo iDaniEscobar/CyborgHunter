@@ -8,5 +8,7 @@
         <file>Recursos/Sprites/Disparo.png</file>
         <file>Recursos/Sonidos/Laser.mp3</file>
         <file>Recursos/Sprites/Granada.png</file>
+        <file>Recursos/Sonidos/Explosion.mp3</file>
+        <file>Recursos/Sprites/Explosion.png</file>
     </qresource>
 </RCC>

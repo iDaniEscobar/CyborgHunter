@@ -19,6 +19,9 @@ Nivel2::Nivel2(QObject *parent) : QGraphicsScene(parent) {
     contadorRecarga = 0.0;
     puedeDisparar = true;
 
+    granadasDisponibles = 3;
+    contadorRecargaGranada = 0.0f;
+
     sonidoDisparo = new QMediaPlayer(this);
     salidaAudio = new QAudioOutput(this);
 
@@ -73,11 +76,20 @@ void Nivel2::keyPressEvent(QKeyEvent *event) {
     }
 
     if (event->key() == Qt::Key_G) {
-        kael->lanzarGranada();
-        Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 45.0f, 60);
-        addItem(granada);
-        listaProyectiles.append(granada);
-        qDebug() << "Lanzar granada.";
+
+        if (granadasDisponibles > 0) {
+            granadasDisponibles--;
+
+            kael->lanzarGranada();
+
+            Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 45.0f, 60);
+            addItem(granada);
+            listaProyectiles.append(granada);
+
+            qDebug() << "¡Granada lanzada! Quedan:" << granadasDisponibles;
+        } else {
+            qDebug() << "¡No te quedan granadas! Esperando recarga de 5 segundos...";
+        }
     }
 
 
@@ -133,14 +145,48 @@ void Nivel2::actualizar() {
     for (int i = 0; i < listaProyectiles.size(); ++i) {
         Proyectil *p = listaProyectiles.at(i);
 
+        Granada *g = dynamic_cast<Granada*>(p);
+
+        if (g && g->pasoSuCiclo()) {
+            removeItem(g);
+            listaProyectiles.removeAt(i);
+            delete g;
+            --i;
+            continue;
+        }
+
         p->mover();
 
-        if (p->getPosx() > 1280 || p->getPosy() > 720) {
-            removeItem(p);
-            listaProyectiles.removeAt(i);
-            delete p;
-            --i;
+        if (g && !g->explotando()) {
+
+
+            if (g->getPosy() >= 620 || g->getPosx() > 1250 || g->getPosy() < 0) {
+                g->explosion();
+                continue;
+            }
+
+            /*QList<QGraphicsItem*> choques = g->collidingItems();
+            for (QGraphicsItem *item : choques) {
+                // Revisa si lo que tocó es un enemigo (Asumiendo que tienes una clase Enemigo o Androide)
+                // if (dynamic_cast<Enemigo*>(item)) {
+                //     g->estallar();
+                //     // Aquí le puedes restar vida al enemigo: dynamic_cast<Enemigo*>(item)->restarVida(g->getDaño());
+                //     break;
+                // }
+            }*/
         }
+
+        else if (!g) {
+            if (p->getPosx() > 1280 || p->getPosx() < 0) {
+                removeItem(p);
+                listaProyectiles.removeAt(i);
+                delete p;
+                --i;
+            }
+        }
+
+
+
     }
 
     if (!puedeDisparar) {
@@ -162,6 +208,20 @@ void Nivel2::actualizar() {
     } else {
         contadorRecarga = 0.0;
     }
+
+    if (granadasDisponibles < 3) {
+        contadorRecargaGranada += dt;
+
+        if (contadorRecargaGranada >= 5.0f) {
+            granadasDisponibles++;
+            contadorRecargaGranada = 0.0f;
+            qDebug() << "Granada regenerada. Total:" << granadasDisponibles;
+        }
+    } else {
+
+        contadorRecargaGranada = 0.0f;
+    }
+
     kael->setEstadoActual(estadoDeMovimiento);
     kael->mover();
 }

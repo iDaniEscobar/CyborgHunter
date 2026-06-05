@@ -31,6 +31,9 @@ private:
     QMediaPlayer *sonidoDisparo;
     QAudioOutput *salidaAudio;
 
+    int granadasDisponibles;
+    float contadorRecargaGranada;
+
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
