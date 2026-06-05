@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Recursos/Fondos/Portada.png</file>
+        <file>Recursos/Sonidos/Portada.mp3</file>
+        <file>Recursos/Sonidos/Nivel2.mp3</file>
+        <file>Recursos/Fondos/Nivel2.png</file>
+        <file>Recursos/Sprites/Jugador.png</file>
+        <file>Recursos/Sprites/Disparo.png</file>
+        <file>Recursos/Sonidos/Laser.mp3</file>
+        <file>Recursos/Sprites/Granada.png</file>
+        <file>Recursos/Sonidos/Explosion.mp3</file>
+        <file>Recursos/Sprites/Explosion.png</file>
+        <file>Recursos/Sprites/Items.png</file>
+        <file>Recursos/Sprites/Enemigo1.png</file>
+        <file>Recursos/Sprites/Enemigo2.png</file>
+    </qresource>
+</RCC>
