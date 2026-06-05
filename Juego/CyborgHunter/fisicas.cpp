@@ -31,3 +31,9 @@ void Fisicas::retroceso(float &elongacion, float &velocidadY, float k, float b, 
     velocidadY += aceleracionY * dt;
     elongacion += velocidadY * dt;
 }
+
+void Fisicas::caidaLibre(double &posY, float &velY, float gravedad, float dt) {
+
+    velY += gravedad * dt;
+    posY += velY * dt;
+}

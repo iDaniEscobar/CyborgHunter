@@ -48,7 +48,37 @@ void Jugador::cortarHojaSprites() {
 void Jugador::mover() {
 
     float dt = 0.02;
+
+    if (modoSobrecarga) {
+        cronometroSobrecarga -= dt;
+
+        Fisicas::resistencia(velocidadX, 0.5f, 70.0f, dt);
+
+        if (cronometroSobrecarga <= 0) {
+            modoSobrecarga = false;
+            velocidadX = velocidad;
+            qDebug() << "Efecto sobrecarga terminado.";
+        }
+    }
+
+    if (modoVeloz) {
+        cronometroVeloz -= dt;
+        if (cronometroVeloz <= 0) {
+            modoVeloz = false;
+            qDebug() << "Efecto modo veloz terminado.";
+        }
+    }
+
     bool seEstaMoviendo = teclaW || teclaA || teclaS || teclaD;
+    float velFinal = modoSobrecarga ? velocidadX : velocidad;
+
+    if (seEstaMoviendo && estadoActual != 2) {
+        if (teclaD) posx += velFinal * dt * 50;
+        else if (teclaA) posx -= velFinal * dt * 50;
+
+        if (teclaS) posy += velFinal * dt * 50;
+        else if (teclaW) posy -= velFinal * dt * 50;
+    }
 
     if (estadoActual != 2 & estadoActual != 3) {
         if (seEstaMoviendo) {
@@ -58,14 +88,14 @@ void Jugador::mover() {
         }
     }
 
-
+/*
     if (seEstaMoviendo && estadoActual != 2) {
         if (teclaD) posx += velocidad * dt * 50;
         else if (teclaA) posx -= velocidad * dt * 50;
 
         if (teclaS) posy += velocidad * dt * 50;
         else if (teclaW) posy -= velocidad * dt * 50;
-    }
+    }*/
 
     if (posx < 0) posx = 0;
     if (posx > 1150) posx = 1150;
@@ -111,7 +141,7 @@ void Jugador::mover() {
     }
 
 
-
+    setPos(posx, posy);
     actualizar();
 }
 
@@ -140,7 +170,19 @@ void Jugador::lanzarGranada() {
     qDebug() << "Granada lanzada";
 }
 
-void Jugador::activarPoder() {
+void Jugador::modificarVida(int cantidad) {
+    vida += cantidad;
+    if (vida > 100) vida = 100;
+    if (vida < 0) vida = 0;
+}
+
+void Jugador::activarSobrecarga() {
     modoSobrecarga = true;
-    qDebug() << "Modo SobreCarga activo";
+    cronometroSobrecarga = 10.0f;
+    velocidadX = velocidad-4;
+}
+
+void Jugador::activarModoVeloz() {
+    modoVeloz = true;
+    cronometroVeloz = 10.0f;
 }

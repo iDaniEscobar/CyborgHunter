@@ -2,6 +2,8 @@
 #include <QBrush>
 #include <QPixmap>
 #include <QDebug>
+#include <cstdlib>
+#include <ctime>
 
 Nivel2::Nivel2(QObject *parent) : QGraphicsScene(parent) {
     setSceneRect(0, 0, 1280, 720);
@@ -28,6 +30,15 @@ Nivel2::Nivel2(QObject *parent) : QGraphicsScene(parent) {
     sonidoDisparo->setAudioOutput(salidaAudio);
     salidaAudio->setVolume(0.6);
     sonidoDisparo->setSource(QUrl("qrc:/Recursos/Sonidos/Laser.mp3"));
+
+    vidaJugador = new QProgressBar();
+    vidaJugador->setRange(0, 100);
+    vidaJugador->setValue(100);
+    vidaJugador->setStyleSheet("QProgressBar { border: 2px solid #00ffcc; rounded-buttons: 5px; text-align: center; color: white; background-color: #111; }"
+                             "QProgressBar::chunk { background-color: #ff0055; }");
+
+    proxyVidaJ = addWidget(vidaJugador);
+    proxyVidaJ->setPos(20, 20);
 
     cargar();
 
@@ -113,7 +124,28 @@ void Nivel2::keyReleaseEvent(QKeyEvent *event) {
 }
 void Nivel2::actualizar() {
 
+    cronometroSpawnItem += dt;
+    if (cronometroSpawnItem >= 9.0f) {
+        spawnearItemAleatorio();
+        cronometroSpawnItem = 0.0f;
+    }
+
+
+    for (int i = 0; i < listaItems.size(); ++i) {
+        listaItems[i]->caer(dt);
+
+        if (listaItems[i]->collidesWithItem(kael)) {
+            listaItems[i]->aplicarEfecto(kael);
+
+            removeItem(listaItems[i]);
+            delete listaItems[i];
+            listaItems.removeAt(i);
+            --i;
+        }
+    }
+
     tiempoRestante -= dt;
+
     if (tiempoRestante <= 0) {
         tiempoRestante = 0;
         timer->stop();
@@ -190,10 +222,14 @@ void Nivel2::actualizar() {
     }
 
     if (!puedeDisparar) {
-        contadorCooldown -= dt;
+        if (kael->isModoVelozActivo()) {
+            contadorCooldown -= (dt * 2.5f);
+        } else {
+            contadorCooldown -= dt;
+        }
+
         if (contadorCooldown <= 0) {
             puedeDisparar = true;
-            qDebug() << "Listo para disparar";
         }
     }
 
@@ -223,5 +259,19 @@ void Nivel2::actualizar() {
     }
 
     kael->setEstadoActual(estadoDeMovimiento);
+    vidaJugador->setValue(kael->getVida());
     kael->mover();
+}
+
+void Nivel2::spawnearItemAleatorio() {
+
+    double xAleatoria = rand() % 576;
+    double ySuperior = -40;
+    int tipoAleatorio = (rand() % 3) + 1;
+
+    Item* nuevoItem = new Item(xAleatoria, ySuperior, tipoAleatorio);
+    addItem(nuevoItem);
+    listaItems.append(nuevoItem);
+
+    qDebug() << "Item generado en X:" << xAleatoria << " Tipo:" << tipoAleatorio;
 }

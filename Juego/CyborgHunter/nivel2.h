@@ -6,9 +6,13 @@
 #include <QKeyEvent>
 #include <QMediaPlayer>
 #include <QAudioOutput>
+#include <QProgressBar>
+#include <QGraphicsProxyWidget>
+#include <QList>
 #include "Jugador.h"
 #include "proyectil.h"
 #include "granada.h"
+#include "item.h"
 
 class Nivel2 : public QGraphicsScene {
     Q_OBJECT
@@ -34,6 +38,12 @@ private:
     int granadasDisponibles;
     float contadorRecargaGranada;
 
+    QProgressBar *vidaJugador;
+    QGraphicsProxyWidget *proxyVidaJ;
+
+    QList<Item*> listaItems;
+    float cronometroSpawnItem;
+    void spawnearItemAleatorio();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
