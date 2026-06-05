@@ -8,6 +8,7 @@
 #include <QAudioOutput>
 #include "Jugador.h"
 #include "proyectil.h"
+#include "granada.h"
 
 class Nivel2 : public QGraphicsScene {
     Q_OBJECT
@@ -29,6 +30,7 @@ private:
     bool puedeDisparar;
     QMediaPlayer *sonidoDisparo;
     QAudioOutput *salidaAudio;
+
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;

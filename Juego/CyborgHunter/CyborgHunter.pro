@@ -11,6 +11,7 @@ CONFIG += c++17
 
 SOURCES += \
     fisicas.cpp \
+    granada.cpp \
     juego.cpp \
     jugador.cpp \
     main.cpp \
@@ -21,6 +22,7 @@ SOURCES += \
 
 HEADERS += \
     fisicas.h \
+    granada.h \
     juego.h \
     jugador.h \
     mainwindow.h \

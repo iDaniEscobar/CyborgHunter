@@ -23,6 +23,7 @@ private:
     int velocidadAnimacion;
 
     void cortarHojaSprites();
+    bool teclaW, teclaA, teclaS, teclaD;
 
     bool debeGenerarBala;
 public:
@@ -32,7 +33,7 @@ public:
     bool disparar();
     void lanzarGranada();
     void activarPoder();
-
+    void estMvmt(bool w, bool a, bool s, bool d);
     double getPosx() const { return posx; }
     void setPosx(double x) { posx = x; }
     double getPosy() const { return posy; }

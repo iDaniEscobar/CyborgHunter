@@ -4,7 +4,7 @@
 #include <QGraphicsPixmapItem>
 
 class Proyectil : public QGraphicsPixmapItem {
-private:
+protected:
     double posx;
     double posy;
     float velocidad;
@@ -14,9 +14,10 @@ private:
 public:
     Proyectil(double x, double y, float vel, float dir, int dmg);
 
-    void mover();
+    virtual void mover();
     void verificarColision();
     double getPosx() const { return posx; }
+    double getPosy() const { return posy; }
 };
 
 #endif // PROYECTIL_H

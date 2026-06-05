@@ -47,13 +47,38 @@ void Jugador::cortarHojaSprites() {
 
 void Jugador::mover() {
 
+    float dt = 0.02;
+    bool seEstaMoviendo = teclaW || teclaA || teclaS || teclaD;
+
+    if (estadoActual != 2 & estadoActual != 3) {
+        if (seEstaMoviendo) {
+            estadoActual = 1;
+        } else {
+            estadoActual = 0;
+        }
+    }
+
+
+    if (seEstaMoviendo && estadoActual != 2) {
+        if (teclaD) posx += velocidad * dt * 50;
+        else if (teclaA) posx -= velocidad * dt * 50;
+
+        if (teclaS) posy += velocidad * dt * 50;
+        else if (teclaW) posy -= velocidad * dt * 50;
+    }
+
+    if (posx < 0) posx = 0;
+    if (posx > 1150) posx = 1150;
+    if (posy < 380) posy = 380;
+    if (posy > 570) posy = 570;
+
     if (estadoActual == 0) {
         frameActual = 0;
         contadorAnimacion = 0;
         setPixmap(framesQuieto[0]);
     }
 
-    else if (estadoActual == 1) {
+    if (estadoActual == 1) {
         contadorAnimacion++;
 
         if (contadorAnimacion >= velocidadAnimacion) {
@@ -85,6 +110,8 @@ void Jugador::mover() {
         }
     }
 
+
+
     actualizar();
 }
 
@@ -99,7 +126,17 @@ bool Jugador::disparar() {
 
 }
 
+void Jugador::estMvmt(bool w, bool a, bool s, bool d) {
+    teclaW = w;
+    teclaA = a;
+    teclaS = s;
+    teclaD = d;
+}
+
 void Jugador::lanzarGranada() {
+    if (!framesGolpe.isEmpty()) {
+        setPixmap(framesGolpe[0]);
+    }
     qDebug() << "Granada lanzada";
 }
 

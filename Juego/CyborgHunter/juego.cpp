@@ -33,7 +33,7 @@ void Juego::mostrarPortada() {
     construirMenu();
 
     musicaFondo->setSource(QUrl("qrc:/Recursos/Sonidos/Portada.mp3"));
-    controlAudio->setVolume(0.3);
+    controlAudio->setVolume(0.2f);
     musicaFondo->setLoops(QMediaPlayer::Infinite);
     musicaFondo->play();
 }
@@ -82,7 +82,7 @@ void Juego::iniciarNivel2() {
     }
 
     musicaFondo->setSource(QUrl("qrc:/Recursos/Sonidos/Nivel2.mp3"));
-    controlAudio->setVolume(0.2);
+    controlAudio->setVolume(0.2f);
     musicaFondo->setLoops(QMediaPlayer::Infinite);
     musicaFondo->play();
 }
