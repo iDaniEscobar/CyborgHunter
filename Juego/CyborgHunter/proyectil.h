@@ -18,6 +18,7 @@ public:
     void verificarColision();
     double getPosx() const { return posx; }
     double getPosy() const { return posy; }
+    int getDaño() const { return daño; }
 };
 
 #endif // PROYECTIL_H

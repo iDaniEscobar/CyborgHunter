@@ -13,6 +13,7 @@
 #include "proyectil.h"
 #include "granada.h"
 #include "item.h"
+#include "enemigo.h"
 
 class Nivel2 : public QGraphicsScene {
     Q_OBJECT
@@ -22,6 +23,7 @@ private:
     float dt;
 
     Jugador *kael;
+    Enemigo *jefe;
     bool teclaW_Presionada;
     bool teclaA_Presionada;
     bool teclaS_Presionada;

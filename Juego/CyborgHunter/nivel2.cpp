@@ -45,6 +45,9 @@ Nivel2::Nivel2(QObject *parent) : QGraphicsScene(parent) {
     kael = new Jugador(100, 500);
     addItem(kael);
 
+    jefe = new Enemigo(1000, 450, 2);
+    addItem(jefe);
+
     timer = new QTimer(this);
 
     connect(timer, &QTimer::timeout, this, &Nivel2::actualizar);
@@ -155,6 +158,40 @@ void Nivel2::actualizar() {
 
     kael->estMvmt(teclaW_Presionada, teclaA_Presionada, teclaS_Presionada, teclaD_Presionada);
     kael->mover();
+
+    if (jefe) {
+        jefe->percibir(kael);
+        jefe->razonar();
+        jefe->actuar(kael);
+
+        if (jefe->estaMuerto()) {
+            qDebug() << "Jefe muerto...";
+        }
+    }
+
+    for (int i = 0; i < listaProyectiles.size(); ++i) {
+        Proyectil *p = listaProyectiles.at(i);
+        p->mover();
+
+        if (jefe && p->collidesWithItem(jefe) && jefe->getVida() > 0) {
+
+            Granada *g = dynamic_cast<Granada*>(p);
+
+            if (g) {
+                g->explosion();
+                jefe->modificarVida(-g->getDaño());
+            } else {
+
+                jefe->modificarVida(-25);
+                removeItem(p);
+                listaProyectiles.removeAt(i);
+                delete p;
+                --i;
+            }
+            qDebug() << "¡Impacto en el Jefe! Vida restante:" << jefe->getVida();
+        }
+    }
+
     int estadoDeMovimiento = kael->getEstadoActual();
 
     if (kael->disparar()) {

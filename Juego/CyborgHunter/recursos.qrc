@@ -11,5 +11,7 @@
         <file>Recursos/Sonidos/Explosion.mp3</file>
         <file>Recursos/Sprites/Explosion.png</file>
         <file>Recursos/Sprites/Items.png</file>
+        <file>Recursos/Sprites/Enemigo1.png</file>
+        <file>Recursos/Sprites/Enemigo2.png</file>
     </qresource>
 </RCC>
