@@ -15,19 +15,23 @@ private:
     QMediaPlayer *musicaFondo;
     QAudioOutput *controlAudio;
 
-    void construirMenu();
+    void musicaN1();
 
 public:
     Juego(QWidget *parent = nullptr);
 
     void mostrarPortada();
-    void iniciarNivel1();
-    void iniciarNivel2();
 
-public slots:
-    void iniciarJuego();
-    void reiniciarNivel2();
+private slots:
+
+    void clickEnfrentamiento();
     void volverAlMenu();
+    void reiniciarNivelActual();
+
+    void mostrarMenuDificultad();
+    void iniciarCampoTiroFacil();
+    void iniciarCampoTiroDificil();
+    void construirMenu();
 };
 
 #endif // JUEGO_H
