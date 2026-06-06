@@ -13,6 +13,7 @@ public:
     void actualizarPosicion(float dt);
     bool recibirDisparo();
     bool verificarSiEstaMuerto() const { return estaMuerto; }
+    bool listaParaEliminar() const;
 
 private:
     float x_inicial;
@@ -20,6 +21,7 @@ private:
     float velocidadInicial;
     float anguloG;
     float tiempoTranscurrido;
+
 
     QPixmap hojaSprites;
     int anchoFrame;

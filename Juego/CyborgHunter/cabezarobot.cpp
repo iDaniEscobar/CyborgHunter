@@ -5,12 +5,11 @@
 CabezaRobot::CabezaRobot(float x0, float y0, float v0, float anguloDeg, float escala, int canonOrigen)
     : QGraphicsPixmapItem(), x_inicial(x0), y_inicial(y0), origen(canonOrigen) {
 
-    qDebug() << "Constructor cabeza";
     estaMuerto = false;
     tiempoTranscurrido = 0.0f;
     frameActual = 0;
     acumuladorAnimacion = 0.0f;
-    velocidadInicial = v0;
+    velocidadInicial = v0 * 0.6f;
     anguloG = anguloDeg;
 
     hojaSprites.load(":/Recursos/Sprites/Robots.png");
@@ -34,15 +33,20 @@ void CabezaRobot::mapearFilaSprite() {
     }
 }
 
-void CabezaRobot::actualizarPosicion(float dt) {
-    tiempoTranscurrido += dt;
+void CabezaRobot::actualizarPosicion(float dt)
+{
+    if(!estaMuerto)
+    {
+        tiempoTranscurrido += dt;
 
-    float nuevoX = 0.0f;
-    float nuevoY = 0.0f;
+        float nuevoX = 0.0f;
+        float nuevoY = 0.0f;
 
-    Fisicas::tiroParabolico(nuevoX, nuevoY, velocidadInicial, anguloG, tiempoTranscurrido, x_inicial, y_inicial);
+        Fisicas::tiroParabolico(nuevoX, nuevoY, velocidadInicial, anguloG, tiempoTranscurrido, x_inicial, y_inicial);
 
-    setPos(nuevoX, nuevoY);
+        setPos(nuevoX, nuevoY);
+    }
+
     avanzarAnimacion(dt);
 }
 
@@ -58,10 +62,7 @@ void CabezaRobot::avanzarAnimacion(float dt) {
         }
     }
 
-    QPixmap framePix = hojaSprites.copy(frameActual * anchoFrame,
-                                        filaActual * altoFrame,
-                                        anchoFrame,
-                                        altoFrame);
+    QPixmap framePix = hojaSprites.copy(frameActual * anchoFrame, filaActual * altoFrame, anchoFrame, altoFrame);
     setPixmap(framePix);
 }
 
@@ -73,6 +74,11 @@ bool CabezaRobot::recibirDisparo() {
         return true;
     }
     return false;
+}
+
+bool CabezaRobot::listaParaEliminar() const
+{
+    return estaMuerto && frameActual >= 3;
 }
 
 CabezaRobot::~CabezaRobot() {}

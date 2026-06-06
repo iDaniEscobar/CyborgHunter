@@ -14,6 +14,8 @@ public:
     Nivel1(QObject *parent = nullptr, QString dificultad = "facil");
     ~Nivel1();
 
+    void mostrarPantallaFinJuego(bool victoria);
+
 signals:
     void solicitarMenuPrincipal();
     void solicitarReiniciarNivel();
@@ -22,6 +24,9 @@ private slots:
     void actualizarJuego();
     void generarObjetivo();
     void apagarFogonazo();
+    void clickReiniciar();
+    void clickMenuPrincipal();
+    void clickSalir();
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
@@ -37,8 +42,11 @@ private:
     QTimer *timerLoop;
     QTimer *timerSpawn;
     QTimer *timerDisparo;
+    float tiempoRestante;
+    bool nivelTerminado;
 
     QGraphicsTextItem *textoContador;
+    QGraphicsTextItem *textoTiempo;
     int cabezasDestruidas;
 
     QGraphicsPixmapItem *spritePistola;

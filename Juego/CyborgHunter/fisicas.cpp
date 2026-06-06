@@ -4,7 +4,7 @@
 void Fisicas::tiroParabolico(float &x, float &y, float v0, float anguloGrados, float tiempo, float xInicial, float yInicial) {
 
     float anguloRadianes = anguloGrados * M_PI / 180.0;
-    float g = 9.8;
+    float g = 12;
 
     x = xInicial + (v0 * cos(anguloRadianes) * tiempo);
     y = yInicial - (v0 * sin(anguloRadianes) * tiempo) + (0.5 * g * tiempo * tiempo);

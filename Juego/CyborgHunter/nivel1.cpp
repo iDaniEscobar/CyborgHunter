@@ -4,6 +4,8 @@
 #include <QApplication>
 #include <QDebug>
 #include <QGraphicsView>
+#include <QPushButton>
+#include <QGraphicsProxyWidget>
 #include <cabezarobot.h>
 
 Nivel1::Nivel1(QObject *parent, QString dificultad)
@@ -18,6 +20,9 @@ Nivel1::Nivel1(QObject *parent, QString dificultad)
     cabezasDestruidas = 0;
     estaDisparando = false;
 
+    tiempoRestante = 20.0f;
+    nivelTerminado = false;
+
     textoContador = new QGraphicsTextItem();
     textoContador->setPlainText("KILLS: 0");
     textoContador->setDefaultTextColor(QColor("#00f0ff"));
@@ -26,6 +31,16 @@ Nivel1::Nivel1(QObject *parent, QString dificultad)
     textoContador->setFont(fuenteHUD);
     textoContador->setPos(640 - textoContador->boundingRect().width()/2, 20);
     addItem(textoContador);
+
+    textoTiempo = new QGraphicsTextItem();
+    textoTiempo->setPlainText("TIEMPO: 20");
+    textoTiempo->setDefaultTextColor(Qt::yellow);
+    QFont fuenteTiempo;
+    fuenteTiempo.setPointSize(20);
+    fuenteTiempo.setBold(true);
+    textoTiempo->setFont(fuenteTiempo);
+    textoTiempo->setPos(20,20);
+    addItem(textoTiempo);
 
     hojaSpritesPistola.load(":/Recursos/Sprites/Pistola.png");
     anchoSpriteFrame = hojaSpritesPistola.width() / 4;
@@ -54,12 +69,12 @@ Nivel1::Nivel1(QObject *parent, QString dificultad)
 
 void Nivel1::configurarDificultad() {
     if (mododificultad == "facil") {
-        velocidadBase = 90.0f;
-        factorEscalaSprite = 1.0f;
+        velocidadBase = 200.0f;
+        factorEscalaSprite = 0.6f;
         intervaloGeneracion = 1800;
     } else {
-        velocidadBase = 26.0f;
-        factorEscalaSprite = 0.6f;
+        velocidadBase = 300.0f;
+        factorEscalaSprite = 0.4f;
         intervaloGeneracion = 1100;
     }
 }
@@ -82,15 +97,15 @@ void Nivel1::actualizarSpritePistola(qreal mouseX) {
         columna = 2;
     }
 
-    QPixmap frameActual = hojaSpritesPistola.copy(columna * anchoSpriteFrame,
-                                                  fila * altoSpriteFrame,
-                                                  anchoSpriteFrame,
-                                                  altoSpriteFrame);
+    QPixmap frameActual = hojaSpritesPistola.copy(columna * anchoSpriteFrame, fila * altoSpriteFrame, anchoSpriteFrame, altoSpriteFrame);
     spritePistola->setPixmap(frameActual);
 
 }
 
 void Nivel1::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+    if(nivelTerminado)
+        return;
+
     if (!estaDisparando) {
         estaDisparando = true;
         actualizarSpritePistola(event->scenePos().x());
@@ -105,8 +120,16 @@ void Nivel1::mousePressEvent(QGraphicsSceneMouseEvent *event) {
             if (robotAfectado) {
                 if (robotAfectado->recibirDisparo()) {
                     cabezasDestruidas++;
+
                     textoContador->setPlainText(QString("KILLS: %1").arg(cabezasDestruidas));
                     textoContador->setPos(640 - textoContador->boundingRect().width()/2, 20);
+
+                    if(cabezasDestruidas >= 10)
+                    {
+                        nivelTerminado = true;
+                        mostrarPantallaFinJuego(true);
+                        return;
+                    }
                 }
             }
         }
@@ -125,16 +148,16 @@ void Nivel1::generarObjetivo() {
     int canonSeleccionado = QRandomGenerator::global()->bounded(0, 2);
 
     float xInicial = 0;
-    float yInicial = 650;
+    float yInicial = 600;
     int anguloAleatorio = 0;
 
     if (canonSeleccionado == 0) {
-        xInicial = 50;
+        xInicial = 100;
         anguloAleatorio = QRandomGenerator::global()->bounded(30, 75);
         qDebug() << "Generando cabezaI";
         qDebug() << "CañónI dispara cabeza con ángulo:" << anguloAleatorio;
     } else {
-        xInicial = 1230;
+        xInicial = 1150;
         anguloAleatorio = QRandomGenerator::global()->bounded(105, 150);
         qDebug() << "Generando cabezaD";
         qDebug() << "CañónD dispara cabeza con ángulo:" << anguloAleatorio;
@@ -145,13 +168,49 @@ void Nivel1::generarObjetivo() {
 }
 
 void Nivel1::actualizarJuego() {
-    QList<QGraphicsItem*> itemsEnEscena = items();
-    for (QGraphicsItem *item : itemsEnEscena) {
-        CabezaRobot *cabeza = dynamic_cast<CabezaRobot*>(item);
-        if (cabeza) {
-            cabeza->actualizarPosicion(0.02f);
+    if(nivelTerminado)
+        return;
 
-            if (cabeza->y() > 750) {
+    tiempoRestante -= 0.02f;
+
+    if(tiempoRestante <= 0)
+    {
+        tiempoRestante = 0;
+
+        if(cabezasDestruidas < 10)
+        {
+
+            nivelTerminado = true;
+            mostrarPantallaFinJuego(false);
+            return;
+        }
+
+        return;
+    }
+
+    textoTiempo->setPlainText(
+        QString("TIEMPO: %1")
+            .arg((int)ceil(tiempoRestante))
+        );
+
+    QList<QGraphicsItem*> itemsEnEscena = items();
+    for (QGraphicsItem *item : itemsEnEscena)
+    {
+        CabezaRobot *cabeza = dynamic_cast<CabezaRobot*>(item);
+
+        if(cabeza)
+        {
+            cabeza->actualizarPosicion(0.05f);
+
+            if(cabeza->listaParaEliminar())
+            {
+                removeItem(cabeza);
+                delete cabeza;
+                continue;
+            }
+
+            if(cabeza->y() > 750)
+            {
                 removeItem(cabeza);
                 delete cabeza;
             }
@@ -159,5 +218,86 @@ void Nivel1::actualizarJuego() {
     }
 }
 
+
+void Nivel1::mostrarPantallaFinJuego(bool victoria) {
+
+    timerLoop->stop();
+    timerSpawn->stop();
+
+
+    QGraphicsRectItem *fondoOscuro = new QGraphicsRectItem(0, 0, 1280, 720);
+    fondoOscuro->setBrush(QBrush(QColor(0, 0, 0, 180)));
+    fondoOscuro->setPen(Qt::NoPen);
+    fondoOscuro->setZValue(10);
+    addItem(fondoOscuro);
+
+
+    QGraphicsTextItem *textoTitulo = new QGraphicsTextItem();
+    if (victoria) {
+        textoTitulo->setPlainText("¡VICTORIA!");
+        textoTitulo->setDefaultTextColor(QColor("#00ff66"));
+    } else {
+        textoTitulo->setPlainText("DERROTA");
+        textoTitulo->setDefaultTextColor(QColor("#ff0033"));
+    }
+
+    QFont fuenteTitulo("Cyber Blast", 70, QFont::Bold);
+    textoTitulo->setFont(fuenteTitulo);
+
+    textoTitulo->setPos(640 - textoTitulo->boundingRect().width() / 2, 200);
+    textoTitulo->setZValue(11);
+    addItem(textoTitulo);
+
+    QString estiloBotones = "QPushButton { background-color: #111; color: white; border: 2px solid #aa00ff; "
+                            "border-radius: 5px; font-size: 18px; font-weight: bold; padding: 10px; }"
+                            "QPushButton::hover { background-color: #8800ff; border-color: white; }";
+
+    if (victoria) {
+
+        QPushButton *btnMenu = new QPushButton("Menú Principal");
+        btnMenu->setStyleSheet(estiloBotones);
+        btnMenu->setGeometry(440, 350, 400, 50);
+        QGraphicsProxyWidget *proxyMenu = addWidget(btnMenu);
+        proxyMenu->setZValue(11);
+        connect(btnMenu, &QPushButton::clicked, this, &Nivel1::clickMenuPrincipal);
+
+        QPushButton *btnSalir = new QPushButton("Salir del Juego");
+        btnSalir->setStyleSheet(estiloBotones);
+        btnSalir->setGeometry(440, 430, 400, 50);
+        QGraphicsProxyWidget *proxySalir = addWidget(btnSalir);
+        proxySalir->setZValue(11);
+        connect(btnSalir, &QPushButton::clicked, this, &Nivel1::clickSalir);
+    }
+    else {
+        QPushButton *btnRepetir = new QPushButton("Reintentar Nivel");
+        btnRepetir->setStyleSheet(estiloBotones);
+        btnRepetir->setGeometry(440, 350, 400, 50);
+        QGraphicsProxyWidget *proxyRepetir = addWidget(btnRepetir);
+        proxyRepetir->setZValue(11);
+        connect(btnRepetir, &QPushButton::clicked, this, &Nivel1::clickReiniciar);
+
+        QPushButton *btnMenu = new QPushButton("Menú Principal");
+        btnMenu->setStyleSheet(estiloBotones);
+        btnMenu->setGeometry(440, 430, 400, 50);
+        QGraphicsProxyWidget *proxyMenu = addWidget(btnMenu);
+        proxyMenu->setZValue(11);
+        connect(btnMenu, &QPushButton::clicked, this, &Nivel1::clickMenuPrincipal);
+    }
+}
+
+void Nivel1::clickReiniciar()
+{
+    emit solicitarReiniciarNivel();
+}
+
+void Nivel1::clickMenuPrincipal()
+{
+    emit solicitarMenuPrincipal();
+}
+
+void Nivel1::clickSalir()
+{
+    qApp->quit();
+}
 
 Nivel1::~Nivel1() {}
