@@ -206,6 +206,18 @@ void Nivel2::actualizar() {
         if (jefe->estaMuerto()) {
             qDebug() << "Jefe muerto...";
         }
+
+        if (jefe->collidesWithItem(kael) && jefe->getVida() > 0) {
+
+            if (kael->getEstadoActual() != 3) {
+
+                kael->modificarVida(-jefe->getDaño());
+
+                kael->golpeElastico(-8.0f, 0.0f);
+
+                qDebug() << "¡Kael chocó con el cuerpo del Jefe! Choque elástico aplicado.";
+            }
+        }
     }
 
     for (int i = 0; i < listaProyectiles.size(); ++i) {
@@ -234,6 +246,10 @@ void Nivel2::actualizar() {
                 jefe->modificarVida(-p->getDaño());
                 jefe->registrarImpacto(kael);
 
+                if (!jefe->estaMuerto()) {
+                    jefe->contraataque();
+                }
+
                 removeItem(p);
                 listaProyectiles.removeAt(i);
                 delete p;
@@ -259,6 +275,19 @@ void Nivel2::actualizar() {
 
 
 
+    }
+
+    if (jefe && jefe->disparar()) {
+
+        Proyectil *balaEnemiga = new Proyectil(jefe->getPosx() - 20, jefe->getPosy() + 100, 15.0, -1.0, 15);
+
+        addItem(balaEnemiga);
+        listaProyectiles.append(balaEnemiga);
+
+        if (sonidoDisparo->playbackState() == QMediaPlayer::PlayingState) {
+            sonidoDisparo->setPosition(0);
+        }
+        sonidoDisparo->play();
     }
 
     for (int i = 0; i < listaProyectiles.size(); ++i) {
@@ -287,6 +316,19 @@ void Nivel2::actualizar() {
         }
 
         else if (!g) {
+
+            if (p->collidesWithItem(kael)) {
+
+                kael->modificarVida(-p->getDaño());
+                kael->golpeElastico(-8.0f, 0.0f);
+                qDebug() << "Kael fue impactado por una bala enemiga. Vida restante:" << kael->getVida();
+
+                removeItem(p);
+                listaProyectiles.removeAt(i);
+                delete p;
+                --i;
+                continue;
+            }
             if (p->getPosx() > 1280 || p->getPosx() < 0) {
                 removeItem(p);
                 listaProyectiles.removeAt(i);

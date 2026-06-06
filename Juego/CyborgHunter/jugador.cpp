@@ -72,76 +72,104 @@ void Jugador::mover() {
         }
     }
 
-    bool seEstaMoviendo = teclaW || teclaA || teclaS || teclaD;
-    float velFinal = modoSobrecarga ? velocidadX : velocidad;
+    if (estadoActual == 3) {
+        // 1. Aplicamos la fricción física de tu archivo de físicas para frenar el empujón
+        Fisicas::resistencia(velocidadX, 0.6f, 80.0f, dt);
+        posx += velocidadX * dt * 50;
 
-    if (seEstaMoviendo && estadoActual != 2) {
-        if (teclaD) posx += velFinal * dt * 50;
-        else if (teclaA) posx -= velFinal * dt * 50;
-
-        if (teclaS) posy += velFinal * dt * 50;
-        else if (teclaW) posy -= velFinal * dt * 50;
-    }
-
-    if (estadoActual != 2 & estadoActual != 3) {
-        if (seEstaMoviendo) {
-            estadoActual = 1;
-        } else {
-            estadoActual = 0;
-        }
-    }
-
-/*
-    if (seEstaMoviendo && estadoActual != 2) {
-        if (teclaD) posx += velocidad * dt * 50;
-        else if (teclaA) posx -= velocidad * dt * 50;
-
-        if (teclaS) posy += velocidad * dt * 50;
-        else if (teclaW) posy -= velocidad * dt * 50;
-    }*/
-
-    if (posx < 0) posx = 0;
-    if (posx > 1150) posx = 1150;
-    if (posy < 380) posy = 380;
-    if (posy > 570) posy = 570;
-
-    if (estadoActual == 0) {
-        frameActual = 0;
-        contadorAnimacion = 0;
-        setPixmap(framesQuieto[0]);
-    }
-
-    if (estadoActual == 1) {
+        // 2. Control del tiempo de los frames de dolor
         contadorAnimacion++;
 
-        if (contadorAnimacion >= velocidadAnimacion) {
+        // 💡 SOLUCIÓN: Le damos un "freno" multiplicador (+3) a la velocidad de animación
+        // para que cada frame de golpe dure más tiempo expuesto en pantalla.
+        if (contadorAnimacion >= (velocidadAnimacion + 3)) {
             contadorAnimacion = 0;
 
-            frameActual++;
-            if (frameActual >= framesCaminar.size()) {
-                frameActual = 0;
+            // Comprobamos si todavía quedan cuadros de dolor por mostrar
+            if (frameActual < framesGolpe.size() - 1) {
+                frameActual++;
+                setPixmap(framesGolpe[frameActual]); // Cambia al siguiente frame de dolor
+
+                qDebug() << "Corriendo frame de golpe de Kael:" << frameActual;
             }
-
-            setPixmap(framesCaminar[frameActual]);
-        }
-    }
-
-    if (estadoActual == 2) {
-        contadorAnimacion++;
-        if (contadorAnimacion >= velocidadAnimacion) {
-            contadorAnimacion = 0;
-            frameActual++;
-
-            if (frameActual >= framesDisparar.size()) {
+            else {
+                // 🔥 AQUÍ SE DETIENEN: Solo cuando se pintó el ÚLTIMO cuadro (Frame 3)
+                // Kael limpia su inercia y regresa al estado normal de juego.
                 frameActual = 0;
                 estadoActual = 0;
+                velocidadX = 0;
 
-                debeGenerarBala = true;
-            } else {
-                setPixmap(framesDisparar[frameActual]);
+                qDebug() << "Animación de choque elástico completada con éxito.";
             }
         }
     }
+
+    else{
+        bool seEstaMoviendo = teclaW || teclaA || teclaS || teclaD;
+        float velFinal = modoSobrecarga ? velocidadX : velocidad;
+
+        if (seEstaMoviendo && estadoActual != 2) {
+            if (teclaD) posx += velFinal * dt * 50;
+            else if (teclaA) posx -= velFinal * dt * 50;
+
+            if (teclaS) posy += velFinal * dt * 50;
+            else if (teclaW) posy -= velFinal * dt * 50;
+        }
+
+        if (estadoActual != 2 & estadoActual != 3) {
+            if (seEstaMoviendo) {
+                estadoActual = 1;
+            } else {
+                estadoActual = 0;
+            }
+        }
+
+        if (posx < 0) posx = 0;
+        if (posx > 1150) posx = 1150;
+        if (posy < 380) posy = 380;
+        if (posy > 570) posy = 570;
+
+        if (estadoActual == 0) {
+            frameActual = 0;
+            contadorAnimacion = 0;
+            setPixmap(framesQuieto[0]);
+        }
+
+        if (estadoActual == 1) {
+            contadorAnimacion++;
+
+            if (contadorAnimacion >= velocidadAnimacion) {
+                contadorAnimacion = 0;
+
+                frameActual++;
+                if (frameActual >= framesCaminar.size()) {
+                    frameActual = 0;
+                }
+
+                setPixmap(framesCaminar[frameActual]);
+            }
+        }
+
+        if (estadoActual == 2) {
+            contadorAnimacion++;
+            if (contadorAnimacion >= velocidadAnimacion) {
+                contadorAnimacion = 0;
+                frameActual++;
+
+                if (frameActual >= framesDisparar.size()) {
+                    frameActual = 0;
+                    estadoActual = 0;
+
+                    debeGenerarBala = true;
+                } else {
+                    setPixmap(framesDisparar[frameActual]);
+                }
+            }
+        }
+
+    }
+
+
 
 
     setPos(posx, posy);
@@ -188,4 +216,19 @@ void Jugador::activarSobrecarga() {
 void Jugador::activarModoVeloz() {
     modoVeloz = true;
     cronometroVeloz = 10.0f;
+}
+
+void Jugador::golpeElastico(float velImpulsoX, float velImpulsoY) {
+
+    estadoActual = 3;
+    frameActual = 0;
+    contadorAnimacion = 0;
+
+
+    velocidadX = velImpulsoX;
+
+    posy += velImpulsoY;
+
+    setPixmap(framesGolpe[0]);
+    qDebug() << "Kael entra en estado de choque elástico. Velocidad de repulsión X:" << velocidadX;
 }

@@ -75,6 +75,10 @@ void Enemigo::razonar()
         return;
     }
 
+    if (estado == 5) {
+        return;
+    }
+
     if(escudoActivo)
     {
         tiempoEscudo -= 0.02f;
@@ -94,36 +98,43 @@ void Enemigo::razonar()
     }
 
 
-    if(contadorDisparosJugador >= 3 &&
+    if(contadorDisparosJugador >= 2 &&
         !escudoActivo &&
         cooldownEscudo <= 0)
     {
         escudoActivo = true;
-        tiempoEscudo = 2.0f;
-        cooldownEscudo = 8.0f;
+        tiempoEscudo = 1.0f;
+        cooldownEscudo = 4.0f;
 
         qDebug() << "Escudo activado";
     }
 
 
-    if(escudoActivo)
-    {
+    if (escudoActivo) {
         estado = 3;
     }
-    else if(vida <= 50)
-    {
-        estado = 2;
-    }
-    else if(jugadorSobrecargado)
-    {
+
+    else if (distanciaJugador < 50) {
         estado = 1;
     }
-    else if(distanciaJugador < 50)
-    {
-        estado = 1;
+
+    else if (jugadorSobrecargado || (abs(posy - ultimaPosYJugador) < 80)) {
+        estado = 5;
     }
-    else
-    {
+
+
+    else if (vida <= 50) {
+        if (posx < 900) {
+            estado = 2;
+        } else {
+            estado = 5;
+        }
+    }
+
+    else if (posx <= 585) {
+        estado = 0;
+    }
+    else {
         estado = 0;
     }
 
@@ -217,8 +228,35 @@ void Enemigo::actuar(Jugador *kael) {
 
             }
         }
-        return;
+        break;
+
+    case 5:
+        if (cooldownDisparoEnemigo > 0) {
+            cooldownDisparoEnemigo -= 0.02f;
+        }
+
+        contadorAnimacion++;
+        if (contadorAnimacion >= velocidadAnimacion) {
+            contadorAnimacion = 0;
+            frameActual++;
+
+            if (frameActual >= framesAtacar.size()) {
+                frameActual = 0;
+                estado = 0;
+
+                if (cooldownDisparoEnemigo <= 0) {
+                    debeGenerarBalaEnemigo = true;
+                    cooldownDisparoEnemigo = 2.0f;
+                }
+            } else {
+                setPixmap(framesAtacar[frameActual]);
+            }
+        }
+        break;
     }
+
+
+
 
     if (posy < 380) posy = 380;
     if (posy > 490) posy = 490;
@@ -304,4 +342,23 @@ void Enemigo::registrarImpacto(Jugador *kael)
     }
 
     contadorDisparosJugador++;
+}
+
+bool Enemigo::disparar() {
+    if (debeGenerarBalaEnemigo) {
+        debeGenerarBalaEnemigo = false;
+        qDebug() << "El Jefe Final generó un proyectil.";
+        return true;
+    }
+    return false;
+}
+
+void Enemigo::contraataque() {
+    if (escudoActivo || estado == 4) return;
+
+    estado = 5;
+    frameActual = 0;
+    contadorAnimacion = 0;
+    cooldownDisparoEnemigo = 0;
+    qDebug() << "¡Jefe enfurecido! Contraataque activado por impacto.";
 }

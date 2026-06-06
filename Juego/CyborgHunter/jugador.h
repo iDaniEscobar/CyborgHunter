@@ -35,14 +35,13 @@ public:
 
     void mover() override;
     bool disparar();
+    void golpeElastico(float velImpulsoX, float velImpulsoY);
     void lanzarGranada();
     void activarSobrecarga();
     void activarModoVeloz();
     void modificarVida(int cantidad);
     void estMvmt(bool w, bool a, bool s, bool d);
-    double getPosx() const { return posx; }
     void setPosx(double x) { posx = x; }
-    double getPosy() const { return posy; }
     void setPosy(double y) { posy = y; }
     double getVelocidad() const { return velocidad; }
     void setEstadoActual(int estado) { estadoActual = estado; }

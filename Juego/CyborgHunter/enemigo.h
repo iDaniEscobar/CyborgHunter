@@ -43,6 +43,9 @@ private:
 
     void cortarHojasSprites();
 
+    bool debeGenerarBalaEnemigo = false;
+    float cooldownDisparoEnemigo = 0.0f;
+
 public:
     Enemigo(double x, double y, int tipo);
 
@@ -59,6 +62,9 @@ public:
     int getVida() const { return vida; }
     bool estaMuerto() const { return (estado == 4); }
     void registrarImpacto(Jugador *kael);
+    bool disparar();
+    void contraataque();
+
 };
 
 #endif // ENEMIGO_H
