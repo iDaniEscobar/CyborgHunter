@@ -42,6 +42,8 @@ private:
 
     QProgressBar *vidaJugador;
     QGraphicsProxyWidget *proxyVidaJ;
+    QProgressBar *vidaJefe;
+    QGraphicsProxyWidget *proxyVidaE;
 
     QList<Item*> listaItems;
     float cronometroSpawnItem;

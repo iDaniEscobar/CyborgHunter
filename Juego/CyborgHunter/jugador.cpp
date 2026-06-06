@@ -11,6 +11,9 @@ Jugador::Jugador(double x, double y) : Personaje(x, y, 100, 5.0, ":/Recursos/Spr
     modoVeloz = false;
     modoSobrecarga = false;
 
+    qDebug() << "Constructor Jugador";
+    qDebug() << "vida desde jugador =" << getVida();
+
     frameActual = 0;
     estadoActual = 0;
 

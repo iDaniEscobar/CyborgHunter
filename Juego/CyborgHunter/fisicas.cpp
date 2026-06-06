@@ -21,16 +21,6 @@ void Fisicas::choqueElastico(float &v, float restitucion) {
     v = -v * restitucion;
 }
 
-void Fisicas::retroceso(float &elongacion, float &velocidadY, float k, float b, float masa, float dt) {
-
-    float fuerzaResorte = -k * elongacion;
-    float fuerzaAmortiguador = -b * velocidadY;
-    float fuerzaTotal = fuerzaResorte + fuerzaAmortiguador;
-    float aceleracionY = fuerzaTotal / masa;
-
-    velocidadY += aceleracionY * dt;
-    elongacion += velocidadY * dt;
-}
 
 void Fisicas::caidaLibre(double &posY, float &velY, float gravedad, float dt) {
 

@@ -6,7 +6,6 @@
 
 class Jugador : public Personaje {
 private:
-    int vida;
     int chipsRecolectados;
     int puntos;
     bool modoVeloz;
@@ -50,6 +49,7 @@ public:
     int getEstadoActual() const { return estadoActual; }
     int getVida() const { return vida; }
     bool isModoVelozActivo() const { return modoVeloz; }
+    bool isModoSobrecargaActivo() const { return modoSobrecarga; }
 };
 
 #endif // JUGADOR_H

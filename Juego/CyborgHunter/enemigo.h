@@ -16,6 +16,17 @@ private:
     int memoriaJugador;
     bool escudoActivo;
 
+    double distanciaJugador;
+    bool jugadorVeloz;
+    bool jugadorSobrecargado;
+    bool jugadorArriba;
+    bool jugadorAbajo;
+    double ultimaPosYJugador;
+    int contadorDisparosJugador;
+    float tiempoEscudo;
+    float cooldownEscudo;
+    float tiempoOlvido;
+
     QPixmap sprites1;
     QPixmap sprites2;
 
@@ -47,6 +58,7 @@ public:
     void modificarVida(int cantidad);
     int getVida() const { return vida; }
     bool estaMuerto() const { return (estado == 4); }
+    void registrarImpacto(Jugador *kael);
 };
 
 #endif // ENEMIGO_H

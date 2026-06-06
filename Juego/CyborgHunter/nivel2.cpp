@@ -34,16 +34,28 @@ Nivel2::Nivel2(QObject *parent) : QGraphicsScene(parent) {
     vidaJugador = new QProgressBar();
     vidaJugador->setRange(0, 100);
     vidaJugador->setValue(100);
-    vidaJugador->setStyleSheet("QProgressBar { border: 2px solid #00ffcc; rounded-buttons: 5px; text-align: center; color: white; background-color: #111; }"
-                             "QProgressBar::chunk { background-color: #ff0055; }");
+    vidaJugador->setStyleSheet("QProgressBar {border: 2px solid #aa00ff; text-align: center; background-color: #111; color: white; }"
+                               "QProgressBar::chunk { background-color: #8800ff; }");
 
     proxyVidaJ = addWidget(vidaJugador);
     proxyVidaJ->setPos(20, 20);
+
+    vidaJefe = new QProgressBar();
+    vidaJefe->setRange(0, 300);
+    vidaJefe->setValue(300);
+
+    vidaJefe->setStyleSheet("QProgressBar {border: 2px solid #aa00ff; text-align: center; background-color: #111; color: white; }"
+                            "QProgressBar::chunk { background-color: #8800ff; }");
+
+    proxyVidaE = addWidget(vidaJefe);
+    proxyVidaE->setPos(1050, 20);
+
 
     cargar();
 
     kael = new Jugador(100, 500);
     addItem(kael);
+    qDebug() << "Vida inicial del jugador:" << kael->getVida();
 
     jefe = new Enemigo(1000, 450, 2);
     addItem(jefe);
@@ -89,20 +101,42 @@ void Nivel2::keyPressEvent(QKeyEvent *event) {
         }
     }
 
-    if (event->key() == Qt::Key_G) {
+    if (event->key() == Qt::Key_E || event->key() == Qt::Key_R || event->key() == Qt::Key_F) {
 
         if (granadasDisponibles > 0) {
             granadasDisponibles--;
 
-            kael->lanzarGranada();
+            if(event->key() == Qt::Key_E){
+                kael->lanzarGranada();
 
-            Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 45.0f, 60);
-            addItem(granada);
-            listaProyectiles.append(granada);
+                Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 60.0f, 10);
+                addItem(granada);
+                listaProyectiles.append(granada);
 
-            qDebug() << "¡Granada lanzada! Quedan:" << granadasDisponibles;
+                qDebug() << "¡Granada lanzada! Quedan:" << granadasDisponibles;
+            }
+
+            if(event->key() == Qt::Key_R){
+                kael->lanzarGranada();
+
+                Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 45.0f, 10);
+                addItem(granada);
+                listaProyectiles.append(granada);
+
+                qDebug() << "¡Granada lanzada! Quedan:" << granadasDisponibles;
+            }
+
+            if(event->key() == Qt::Key_F){
+                kael->lanzarGranada();
+
+                Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 30.0f, 10);
+                addItem(granada);
+                listaProyectiles.append(granada);
+
+                qDebug() << "¡Granada lanzada! Quedan:" << granadasDisponibles;
+            }
         } else {
-            qDebug() << "¡No te quedan granadas! Esperando recarga de 5 segundos...";
+            qDebug() << "No quedan granadas.";
         }
     }
 
@@ -163,6 +197,7 @@ void Nivel2::actualizar() {
         jefe->percibir(kael);
         jefe->razonar();
         jefe->actuar(kael);
+        vidaJefe->setValue(jefe->getVida());
 
         if (jefe->estaMuerto()) {
             qDebug() << "Jefe muerto...";
@@ -178,11 +213,20 @@ void Nivel2::actualizar() {
             Granada *g = dynamic_cast<Granada*>(p);
 
             if (g) {
-                g->explosion();
                 jefe->modificarVida(-g->getDaño());
+                jefe->registrarImpacto(kael);
+
+                g->explosion();
+                removeItem(g);
+                listaProyectiles.removeAt(i);
+                delete g;
+                --i;
+
             } else {
 
                 jefe->modificarVida(-25);
+                jefe->registrarImpacto(kael);
+
                 removeItem(p);
                 listaProyectiles.removeAt(i);
                 delete p;
@@ -195,7 +239,6 @@ void Nivel2::actualizar() {
     int estadoDeMovimiento = kael->getEstadoActual();
 
     if (kael->disparar()) {
-
 
         Proyectil *bala = new Proyectil(kael->getPosx() + 80, kael->getPosy() + 45, 15.0, 1.0, 25);
         addItem(bala);
