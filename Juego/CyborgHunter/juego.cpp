@@ -26,6 +26,11 @@ void Juego::mostrarPortada() {
     menuEscena = new QGraphicsScene(this);
     menuEscena->setSceneRect(0, 0, 1280, 720);
 
+    this->setCursor(Qt::ArrowCursor);
+    if (this->viewport()) {
+        this->viewport()->setCursor(Qt::ArrowCursor);
+    }
+
     QPixmap imgPortada(":/Recursos/Fondos/Portada.png");
     QPixmap fPortada = imgPortada.scaled(1280, 720, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     menuEscena->setBackgroundBrush(QBrush(fPortada));
@@ -116,6 +121,10 @@ void Juego::volverAlMenu() {
 
     musicaFondo->stop();
     this->setMouseTracking(false);
+    this->setCursor(Qt::ArrowCursor);
+    if (this->viewport()) {
+        this->viewport()->setCursor(Qt::ArrowCursor);
+    }
 
     if (nivelActual) {
         nivelActual->deleteLater();
@@ -200,6 +209,28 @@ void Juego::iniciarCampoTiroDificil() {
     nivelActual = new Nivel1(this, "dificil");
     setScene(nivelActual);
     this->setMouseTracking(true);
+
+    QPixmap imagenMira(":/Recursos/Sprites/Mira.png");
+    if (!imagenMira.isNull()) {
+        QPixmap miraEscalada = imagenMira.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        int hotspotX = miraEscalada.width() / 2;
+        int hotspotY = miraEscalada.height() / 2;
+        QCursor cursorMira(miraEscalada, hotspotX, hotspotY);
+
+        qDebug() << "Se carga la imagen de la mira y se fuerza a la escena.";
+
+        this->setCursor(cursorMira);
+        nivelActual->setProperty("cursor", QVariant::fromValue(cursorMira));
+
+        QTimer::singleShot(50, this, [this, cursorMira]() {
+            this->setCursor(cursorMira);
+            if(this->viewport()) {
+                this->viewport()->setCursor(cursorMira);
+            }
+        });
+    } else {
+        qDebug() << "No se pudo cargar la imagen de la mira.";
+    }
 
     Nivel1 *n1 = qobject_cast<Nivel1*>(nivelActual);
     if (n1) {

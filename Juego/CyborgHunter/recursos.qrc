@@ -20,5 +20,6 @@
         <file>Recursos/Fondos/Nivel1.png</file>
         <file>Recursos/Sprites/Pistola.png</file>
         <file>Recursos/Sprites/Robots.png</file>
+        <file>Recursos/Sprites/Mira.png</file>
     </qresource>
 </RCC>
