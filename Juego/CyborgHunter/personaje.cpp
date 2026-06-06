@@ -6,6 +6,10 @@ Personaje::Personaje(double x, double y, int vidaInicial, double velInicial, con
     vida = vidaInicial;
     velocidad = velInicial;
 
+    qDebug() << "Constructor Personaje";
+    qDebug() << "vidaInicial =" << vidaInicial;
+    qDebug() << "vida =" << vida;
+
     QPixmap pixmap(rutaSprite);
     QPixmap spriteEscalado = pixmap.scaled(64, 64, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 

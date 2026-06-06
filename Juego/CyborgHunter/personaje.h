@@ -19,6 +19,9 @@ public:
     virtual void actualizar();
 
     int getVida() const { return vida; }
+    double getPosx() const { return posx; }
+    double getPosy() const { return posy; }
+
 };
 
 #endif // PERSONAJE_H

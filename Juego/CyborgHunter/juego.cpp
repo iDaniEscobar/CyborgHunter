@@ -72,9 +72,18 @@ void Juego::iniciarJuego() {
 }
 
 void Juego::iniciarNivel2() {
-    nivelActual = new Nivel2(this);
 
+    if (nivelActual) {
+        nivelActual->deleteLater();
+        nivelActual = nullptr;
+    }
+
+
+    nivelActual = new Nivel2(this);
     setScene(nivelActual);
+    Nivel2 *nivel2Especifico = qobject_cast<Nivel2*>(nivelActual);
+    connect(nivel2Especifico, &Nivel2::solicitarReiniciarNivel, this, &Juego::reiniciarNivel2);
+    connect(nivel2Especifico, &Nivel2::solicitarMenuPrincipal, this, &Juego::volverAlMenu);
 
     if (menuEscena) {
         menuEscena->deleteLater();
@@ -85,4 +94,26 @@ void Juego::iniciarNivel2() {
     controlAudio->setVolume(0.2f);
     musicaFondo->setLoops(QMediaPlayer::Infinite);
     musicaFondo->play();
+}
+
+
+void Juego::reiniciarNivel2() {
+    qDebug() << "Controlador Juego: Reiniciando Nivel 2...";
+
+    musicaFondo->stop();
+
+    iniciarNivel2();
+}
+
+void Juego::volverAlMenu() {
+    qDebug() << "Controlador Juego: Volviendo al menú principal...";
+
+    musicaFondo->stop();
+
+    if (nivelActual) {
+        nivelActual->deleteLater();
+        nivelActual = nullptr;
+    }
+
+    mostrarPortada();
 }

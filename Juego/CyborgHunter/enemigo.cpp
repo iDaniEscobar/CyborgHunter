@@ -4,7 +4,7 @@
 #include <cmath>
 
 Enemigo::Enemigo(double x, double y, int tipo)
-    : Personaje(x, y, (tipo == 2 ? 300 : 50), 2.5, "") {
+    : Personaje(x, y, (tipo == 2 ? 200 : 50), 2.5, "") {
 
     tipoMovimiento = tipo;
     daño = (tipoMovimiento == 2) ? 20 : 10;
@@ -15,6 +15,15 @@ Enemigo::Enemigo(double x, double y, int tipo)
     frameActual = 0;
     contadorAnimacion = 0;
     velocidadAnimacion = 6;
+
+    jugadorArriba = false;
+    jugadorAbajo = false;
+    tiempoOlvido = 0.0f;
+
+    ultimaPosYJugador = 0;
+    contadorDisparosJugador = 0;
+    tiempoEscudo = 0.0f;
+    cooldownEscudo = 0.0f;
 
     sprites1.load(":/Recursos/Sprites/Enemigo1.png");
     sprites2.load(":/Recursos/Sprites/Enemigo2.png");
@@ -45,45 +54,89 @@ void Enemigo::cortarHojasSprites() {
     for(int i = 0; i < 4; ++i) {
         framesEscudo.append(sprites2.copy(QRect(i * anchoSprite, 2 * altoSprite, anchoSprite, altoSprite)));
     }
-    framesAtacar[0].save("frame0.png");
-    framesAtacar[1].save("frame1.png");
-    framesAtacar[2].save("frame2.png");
-    framesAtacar[3].save("frame3.png");
 }
 
 void Enemigo::percibir(Jugador *kael) {
     if (!kael) return;
 
-    double distancia = sqrt(pow(kael->getPosx() - posx, 2) + pow(kael->getPosy() - posy, 2));
+    distanciaJugador = sqrt(pow(kael->getPosx() - posx, 2) + pow(kael->getPosy() - posy, 2));
 
+    jugadorVeloz = kael->isModoVelozActivo();
+    jugadorSobrecargado = kael->isModoSobrecargaActivo();
 
-    if (tipoMovimiento == 1) {
-        if (distancia < 200) estado = 1;
-        else estado = 0;
+    jugadorArriba = kael->getPosy() < posy;
+    jugadorAbajo = kael->getPosy() > posy;
+
+}
+
+void Enemigo::razonar()
+{   if (vida <= 0 || estado == 4) {
+        estado = 4;
         return;
     }
 
-    if (distancia < 300 && kael->getVida() < 30) {
-        estado = 1;
+    if (estado == 5) {
+        return;
     }
-    else if (distancia < 250 && estado == 1) {
 
+    if(escudoActivo)
+    {
+        tiempoEscudo -= 0.02f;
+
+        if(tiempoEscudo <= 0)
+        {
+            escudoActivo = false;
+            contadorDisparosJugador = 0;
+
+            qDebug() << "Escudo desactivado";
+        }
+    }
+
+    if(cooldownEscudo > 0)
+    {
+        cooldownEscudo -= 0.02f;
+    }
+
+
+    if(contadorDisparosJugador >= 2 &&
+        !escudoActivo &&
+        cooldownEscudo <= 0)
+    {
+        escudoActivo = true;
+        tiempoEscudo = 1.0f;
+        cooldownEscudo = 4.0f;
+
+        qDebug() << "Escudo activado";
+    }
+
+
+    if (escudoActivo) {
         estado = 3;
     }
-    else if (this->vida < 50) {
-        estado = 2;
+
+    else if (distanciaJugador < 50) {
+        estado = 1;
+    }
+
+    else if (jugadorSobrecargado || (abs(posy - ultimaPosYJugador) < 80)) {
+        contraataque();
+        estado = 5;
+    }
+
+
+    else if (vida <= 50) {
+        if (posx < 900) {
+            estado = 2;
+        } else {
+            estado = 5;
+        }
+    }
+
+    else if (posx <= 585) {
+        estado = 0;
     }
     else {
         estado = 0;
-    }
-}
-
-void Enemigo::razonar() {
-
-    if (estado == 3) {
-        escudoActivo = true;
-    } else {
-        escudoActivo = false;
     }
 
     aprender();
@@ -92,7 +145,7 @@ void Enemigo::razonar() {
 void Enemigo::actuar(Jugador *kael) {
     if (!kael) return;
 
-    float dt = 0.02;
+    //float dt = 0.02;
     float velocidadEnemigo = velocidad;
 
     switch (estado) {
@@ -132,10 +185,27 @@ void Enemigo::actuar(Jugador *kael) {
         break;
 
     case 2:
-        if (kael->getPosx() > posx) posx -= (velocidadEnemigo * 1.5);
-        else posx += (velocidadEnemigo * 1.5);
 
-        setPixmap(framesCaminar[0]);
+        if(kael->getPosx() > posx)
+            posx -= velocidadEnemigo;
+        else
+            posx += velocidadEnemigo;
+
+        if(jugadorArriba)
+            posy += 1.0;
+        else
+            posy -= 1.0;
+
+        contadorAnimacion++;
+
+        if(contadorAnimacion >= velocidadAnimacion)
+        {
+            contadorAnimacion = 0;
+            frameActual = (frameActual + 1) % framesCaminar.size();
+
+            setPixmap(framesCaminar[frameActual]);
+        }
+
         break;
 
     case 3:
@@ -159,20 +229,67 @@ void Enemigo::actuar(Jugador *kael) {
 
             }
         }
-        return; //
+        break;
+
+    case 5:
+        if (cooldownDisparoEnemigo > 0) {
+            cooldownDisparoEnemigo -= 0.02f;
+        }
+
+        contadorAnimacion++;
+        if (contadorAnimacion >= velocidadAnimacion) {
+            contadorAnimacion = 0;
+            frameActual++;
+
+            if (frameActual >= framesAtacar.size()) {
+                frameActual = 0;
+                estado = 0;
+
+                if (cooldownDisparoEnemigo <= 0) {
+                    debeGenerarBalaEnemigo = true;
+                    cooldownDisparoEnemigo = 2.0f;
+                }
+            } else {
+                setPixmap(framesAtacar[frameActual]);
+            }
+        }
+        break;
     }
 
+
+
+
     if (posy < 380) posy = 380;
-    if (posy > 570) posy = 570;
-    if (posx > 1150) posx = 1150;
+    if (posy > 490) posy = 490;
+    if (posx > 950) posx = 950;
     if (posx < 370) posx = 370;
 
     setPos(posx, posy);
 }
 
-void Enemigo::aprender() {
-    if (estado == 2) {
-        memoriaJugador++;
+void Enemigo::aprender()
+{
+    tiempoOlvido += 0.02f;
+
+    if(tiempoOlvido >= 10.0f)
+    {
+        if(memoriaJugador > 0)
+            memoriaJugador--;
+
+        else if(memoriaJugador < 0)
+            memoriaJugador++;
+
+        tiempoOlvido = 0.0f;
+    }
+
+    if(memoriaJugador > 1)
+    {
+        posy += 1.5;
+    }
+
+    else if(memoriaJugador < -1)
+    {
+        posy -= 1;
     }
 }
 
@@ -181,7 +298,7 @@ void Enemigo::mover() {
 
 void Enemigo::atacar(Jugador *kael) {
 
-    if (abs(kael->getPosx() - posx) < 50) {
+    if (abs(kael->getPosx() - posx) < 150) {
         kael->modificarVida(-1);
     }
 }
@@ -208,6 +325,41 @@ void Enemigo::modificarVida(int cantidad) {
         qDebug() << "El núcleo del Jefe Final fue liberado.";
     }
 
-    int vidaMaxima = (tipoMovimiento == 2) ? 300 : 50;
+    int vidaMaxima = (tipoMovimiento == 2) ? 200 : 50;
     if (vida > vidaMaxima) vida = vidaMaxima;
+}
+
+void Enemigo::registrarImpacto(Jugador *kael)
+{
+    if(!kael) return;
+
+    if(kael->getPosy() - 45 < 475)
+    {
+        memoriaJugador++;
+    }
+    else
+    {
+        memoriaJugador--;
+    }
+
+    contadorDisparosJugador++;
+}
+
+bool Enemigo::disparar() {
+    if (debeGenerarBalaEnemigo) {
+        debeGenerarBalaEnemigo = false;
+        qDebug() << "El Jefe Final generó un proyectil.";
+        return true;
+    }
+    return false;
+}
+
+void Enemigo::contraataque() {
+    if (escudoActivo || estado == 4) return;
+
+    estado = 5;
+    frameActual = 0;
+    contadorAnimacion = 0;
+    cooldownDisparoEnemigo = 0;
+    qDebug() << "¡Jefe enfurecido! Contraataque activado por impacto.";
 }

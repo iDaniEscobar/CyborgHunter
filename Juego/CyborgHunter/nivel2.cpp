@@ -4,6 +4,11 @@
 #include <QDebug>
 #include <cstdlib>
 #include <ctime>
+#include <QApplication>
+#include <QGraphicsRectItem>
+#include <QGraphicsTextItem>
+#include <QPushButton>
+
 
 Nivel2::Nivel2(QObject *parent) : QGraphicsScene(parent) {
     setSceneRect(0, 0, 1280, 720);
@@ -34,16 +39,30 @@ Nivel2::Nivel2(QObject *parent) : QGraphicsScene(parent) {
     vidaJugador = new QProgressBar();
     vidaJugador->setRange(0, 100);
     vidaJugador->setValue(100);
-    vidaJugador->setStyleSheet("QProgressBar { border: 2px solid #00ffcc; rounded-buttons: 5px; text-align: center; color: white; background-color: #111; }"
-                             "QProgressBar::chunk { background-color: #ff0055; }");
+    vidaJugador->setStyleSheet("QProgressBar {border: 2px solid #aa00ff; text-align: center; background-color: #111; color: white; }"
+                               "QProgressBar::chunk { background-color: #8800ff; }");
 
     proxyVidaJ = addWidget(vidaJugador);
     proxyVidaJ->setPos(20, 20);
+
+    vidaJefe = new QProgressBar();
+    vidaJefe->setRange(0, 200);
+    vidaJefe->setValue(200);
+
+    vidaJefe->setStyleSheet("QProgressBar {border: 2px solid #aa00ff; text-align: center; background-color: #111; color: white; }"
+                            "QProgressBar::chunk { background-color: #8800ff; }");
+
+    proxyVidaE = addWidget(vidaJefe);
+    proxyVidaE->setPos(1050, 20);
+
+    actualizarBalas();
+    actualizarGranadas();
 
     cargar();
 
     kael = new Jugador(100, 500);
     addItem(kael);
+    qDebug() << "Vida inicial del jugador:" << kael->getVida();
 
     jefe = new Enemigo(1000, 450, 2);
     addItem(jefe);
@@ -79,6 +98,7 @@ void Nivel2::keyPressEvent(QKeyEvent *event) {
         if (puedeDisparar && balasDisponibles > 0) {
             kael->setEstadoActual(2);
             balasDisponibles--;
+            actualizarBalas();
             puedeDisparar = false;
             contadorCooldown = 2.0;
             qDebug() << "Balas restantes:" << balasDisponibles;
@@ -89,20 +109,43 @@ void Nivel2::keyPressEvent(QKeyEvent *event) {
         }
     }
 
-    if (event->key() == Qt::Key_G) {
+    if (event->key() == Qt::Key_E || event->key() == Qt::Key_R || event->key() == Qt::Key_F) {
 
         if (granadasDisponibles > 0) {
             granadasDisponibles--;
+            actualizarGranadas();
 
-            kael->lanzarGranada();
+            if(event->key() == Qt::Key_E){
+                kael->lanzarGranada();
 
-            Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 45.0f, 60);
-            addItem(granada);
-            listaProyectiles.append(granada);
+                Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 60.0f, 30);
+                addItem(granada);
+                listaProyectiles.append(granada);
 
-            qDebug() << "¡Granada lanzada! Quedan:" << granadasDisponibles;
+                qDebug() << "¡Granada lanzada! Quedan:" << granadasDisponibles;
+            }
+
+            if(event->key() == Qt::Key_R){
+                kael->lanzarGranada();
+
+                Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 45.0f, 30);
+                addItem(granada);
+                listaProyectiles.append(granada);
+
+                qDebug() << "¡Granada lanzada! Quedan:" << granadasDisponibles;
+            }
+
+            if(event->key() == Qt::Key_F){
+                kael->lanzarGranada();
+
+                Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 30.0f, 30);
+                addItem(granada);
+                listaProyectiles.append(granada);
+
+                qDebug() << "¡Granada lanzada! Quedan:" << granadasDisponibles;
+            }
         } else {
-            qDebug() << "¡No te quedan granadas! Esperando recarga de 5 segundos...";
+            qDebug() << "No quedan granadas.";
         }
     }
 
@@ -163,9 +206,22 @@ void Nivel2::actualizar() {
         jefe->percibir(kael);
         jefe->razonar();
         jefe->actuar(kael);
+        vidaJefe->setValue(jefe->getVida());
 
         if (jefe->estaMuerto()) {
             qDebug() << "Jefe muerto...";
+        }
+
+        if (jefe->collidesWithItem(kael) && jefe->getVida() > 0) {
+
+            if (kael->getEstadoActual() != 3) {
+
+                kael->modificarVida(-jefe->getDaño());
+
+                kael->golpeElastico(-8.0f, 0.0f);
+
+                qDebug() << "¡Kael chocó con el cuerpo del Jefe! Choque elástico aplicado.";
+            }
         }
     }
 
@@ -178,11 +234,27 @@ void Nivel2::actualizar() {
             Granada *g = dynamic_cast<Granada*>(p);
 
             if (g) {
+
                 g->explosion();
-                jefe->modificarVida(-g->getDaño());
+                if (g->pasoSuCiclo()) {
+                    jefe->modificarVida(-g->getDaño());
+                    jefe->registrarImpacto(kael);
+                    removeItem(g);
+                    listaProyectiles.removeAt(i);
+                    delete g;
+                    --i;
+                    continue;
+                }
+
             } else {
 
-                jefe->modificarVida(-25);
+                jefe->modificarVida(-p->getDaño());
+                jefe->registrarImpacto(kael);
+
+                if (!jefe->estaMuerto()) {
+                    jefe->contraataque();
+                }
+
                 removeItem(p);
                 listaProyectiles.removeAt(i);
                 delete p;
@@ -196,8 +268,7 @@ void Nivel2::actualizar() {
 
     if (kael->disparar()) {
 
-
-        Proyectil *bala = new Proyectil(kael->getPosx() + 80, kael->getPosy() + 45, 15.0, 1.0, 25);
+        Proyectil *bala = new Proyectil(kael->getPosx() + 80, kael->getPosy() + 45, 15.0, 1.0, 20);
         addItem(bala);
         listaProyectiles.append(bala);
 
@@ -209,6 +280,19 @@ void Nivel2::actualizar() {
 
 
 
+    }
+
+    if (jefe && jefe->disparar()) {
+
+        Proyectil *balaEnemiga = new Proyectil(jefe->getPosx() - 20, jefe->getPosy() + 100, 15.0, -1.0, 15);
+
+        addItem(balaEnemiga);
+        listaProyectiles.append(balaEnemiga);
+
+        if (sonidoDisparo->playbackState() == QMediaPlayer::PlayingState) {
+            sonidoDisparo->setPosition(0);
+        }
+        sonidoDisparo->play();
     }
 
     for (int i = 0; i < listaProyectiles.size(); ++i) {
@@ -234,18 +318,22 @@ void Nivel2::actualizar() {
                 continue;
             }
 
-            /*QList<QGraphicsItem*> choques = g->collidingItems();
-            for (QGraphicsItem *item : choques) {
-                // Revisa si lo que tocó es un enemigo (Asumiendo que tienes una clase Enemigo o Androide)
-                // if (dynamic_cast<Enemigo*>(item)) {
-                //     g->estallar();
-                //     // Aquí le puedes restar vida al enemigo: dynamic_cast<Enemigo*>(item)->restarVida(g->getDaño());
-                //     break;
-                // }
-            }*/
         }
 
         else if (!g) {
+
+            if (p->collidesWithItem(kael)) {
+
+                kael->modificarVida(-p->getDaño());
+                kael->golpeElastico(-8.0f, 0.0f);
+                qDebug() << "Kael fue impactado por una bala enemiga. Vida restante:" << kael->getVida();
+
+                removeItem(p);
+                listaProyectiles.removeAt(i);
+                delete p;
+                --i;
+                continue;
+            }
             if (p->getPosx() > 1280 || p->getPosx() < 0) {
                 removeItem(p);
                 listaProyectiles.removeAt(i);
@@ -275,6 +363,7 @@ void Nivel2::actualizar() {
         contadorRecarga += dt;
         if (contadorRecarga >= 5.0) {
             balasDisponibles++;
+            actualizarBalas();
             contadorRecarga = 0.0;
             qDebug() << "Munición recargada. Total:" << balasDisponibles;
         }
@@ -287,6 +376,7 @@ void Nivel2::actualizar() {
 
         if (contadorRecargaGranada >= 5.0f) {
             granadasDisponibles++;
+            actualizarGranadas();
             contadorRecargaGranada = 0.0f;
             qDebug() << "Granada regenerada. Total:" << granadasDisponibles;
         }
@@ -297,7 +387,30 @@ void Nivel2::actualizar() {
 
     kael->setEstadoActual(estadoDeMovimiento);
     vidaJugador->setValue(kael->getVida());
+    if (kael->getVida() > 0) {
+        kael->setEstadoActual(estadoDeMovimiento);
+    }
+    else if (kael->getVida() == 0){
+
+        kael->setEstadoActual(4);
+        if (kael->getFrameActual() == 3) {
+            mostrarPantallaFinJuego(false);
+            return;
+        }
+    }
     kael->mover();
+    if (jefe && jefe->getVida() <= 0) {
+
+        if (jefe->getFrameActual() == 3) {
+            mostrarPantallaFinJuego(true);
+            return;
+        }
+
+    }
+    if (tiempoRestante <= 0) {
+        mostrarPantallaFinJuego(false);
+        return;
+    }
 }
 
 void Nivel2::spawnearItemAleatorio() {
@@ -311,4 +424,123 @@ void Nivel2::spawnearItemAleatorio() {
     listaItems.append(nuevoItem);
 
     qDebug() << "Item generado en X:" << xAleatoria << " Tipo:" << tipoAleatorio;
+}
+
+void Nivel2::actualizarBalas() {
+    for (auto icono : icnBalas) {
+        removeItem(icono);
+        delete icono;
+    }
+    icnBalas.clear();
+
+    QPixmap spriteBala(":/Recursos/Sprites/Bala.png");
+    QPixmap balaEscalada = spriteBala.scaled(30, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    for (int i = 0; i < balasDisponibles; ++i) {
+        QGraphicsPixmapItem* nuevoIcono = new QGraphicsPixmapItem(balaEscalada);
+
+        nuevoIcono->setPos(20 + (i * 30), 60);
+
+        addItem(nuevoIcono);
+        icnBalas.append(nuevoIcono);
+    }
+}
+
+void Nivel2::actualizarGranadas() {
+    for (auto icono : icnGranadas) {
+        removeItem(icono);
+        delete icono;
+    }
+    icnGranadas.clear();
+
+    QPixmap spriteGranada(":/Recursos/Sprites/Granada.png");
+    QPixmap granadaEscalada = spriteGranada.scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    for (int i = 0; i < granadasDisponibles; ++i) {
+        QGraphicsPixmapItem* nuevoIcono = new QGraphicsPixmapItem(granadaEscalada);
+
+        nuevoIcono->setPos(20 + (i * 50), 100);
+
+        addItem(nuevoIcono);
+        icnGranadas.append(nuevoIcono);
+    }
+}
+
+void Nivel2::clickReiniciar() {
+    qDebug() << "Nivel2 emite: solicitarReiniciarNivel";
+    emit solicitarReiniciarNivel();
+}
+
+void Nivel2::clickMenuPrincipal() {
+    qDebug() << "Nivel2 emite: solicitarMenuPrincipal";
+    emit solicitarMenuPrincipal();
+}
+
+void Nivel2::clickSalir() {
+    qDebug() << "Cerrando aplicación.";
+    QApplication::quit();
+}
+
+void Nivel2::mostrarPantallaFinJuego(bool victoria) {
+
+    timer->stop();
+
+    QGraphicsRectItem *fondoOscuro = new QGraphicsRectItem(0, 0, 1280, 720);
+    fondoOscuro->setBrush(QBrush(QColor(0, 0, 0, 180)));
+    fondoOscuro->setPen(Qt::NoPen);
+    fondoOscuro->setZValue(10);
+    addItem(fondoOscuro);
+
+
+    QGraphicsTextItem *textoTitulo = new QGraphicsTextItem();
+    if (victoria) {
+        textoTitulo->setPlainText("¡VICTORIA!");
+        textoTitulo->setDefaultTextColor(QColor("#00ff66"));
+    } else {
+        textoTitulo->setPlainText("DERROTA");
+        textoTitulo->setDefaultTextColor(QColor("#ff0033"));
+    }
+
+    QFont fuenteTitulo("Cyber Blast", 70, QFont::Bold);
+    textoTitulo->setFont(fuenteTitulo);
+
+    textoTitulo->setPos(640 - textoTitulo->boundingRect().width() / 2, 200);
+    textoTitulo->setZValue(11);
+    addItem(textoTitulo);
+
+    QString estiloBotones = "QPushButton { background-color: #111; color: white; border: 2px solid #aa00ff; "
+                            "border-radius: 5px; font-size: 18px; font-weight: bold; padding: 10px; }"
+                            "QPushButton::hover { background-color: #8800ff; border-color: white; }";
+
+    if (victoria) {
+
+        QPushButton *btnMenu = new QPushButton("Menú Principal");
+        btnMenu->setStyleSheet(estiloBotones);
+        btnMenu->setGeometry(440, 350, 400, 50);
+        QGraphicsProxyWidget *proxyMenu = addWidget(btnMenu);
+        proxyMenu->setZValue(11);
+        connect(btnMenu, &QPushButton::clicked, this, &Nivel2::clickMenuPrincipal);
+
+        QPushButton *btnSalir = new QPushButton("Salir del Juego");
+        btnSalir->setStyleSheet(estiloBotones);
+        btnSalir->setGeometry(440, 430, 400, 50);
+        QGraphicsProxyWidget *proxySalir = addWidget(btnSalir);
+        proxySalir->setZValue(11);
+        connect(btnSalir, &QPushButton::clicked, this, &Nivel2::clickSalir);
+    }
+    else {
+        QPushButton *btnRepetir = new QPushButton("Reintentar Nivel");
+        btnRepetir->setStyleSheet(estiloBotones);
+        btnRepetir->setGeometry(440, 350, 400, 50);
+        QGraphicsProxyWidget *proxyRepetir = addWidget(btnRepetir);
+        proxyRepetir->setZValue(11);
+        connect(btnRepetir, &QPushButton::clicked, this, &Nivel2::clickReiniciar);
+
+        QPushButton *btnMenu = new QPushButton("Menú Principal");
+        btnMenu->setStyleSheet(estiloBotones);
+        btnMenu->setGeometry(440, 430, 400, 50);
+        QGraphicsProxyWidget *proxyMenu = addWidget(btnMenu);
+        proxyMenu->setZValue(11);
+        connect(btnMenu, &QPushButton::clicked, this, &Nivel2::clickMenuPrincipal);
+    }
 }

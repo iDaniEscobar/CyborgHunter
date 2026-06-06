@@ -42,10 +42,18 @@ private:
 
     QProgressBar *vidaJugador;
     QGraphicsProxyWidget *proxyVidaJ;
+    QProgressBar *vidaJefe;
+    QGraphicsProxyWidget *proxyVidaE;
 
     QList<Item*> listaItems;
     float cronometroSpawnItem;
     void spawnearItemAleatorio();
+
+    QList<QGraphicsPixmapItem*> icnBalas;
+    QList<QGraphicsPixmapItem*> icnGranadas;
+
+    void actualizarBalas();
+    void actualizarGranadas();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -54,9 +62,19 @@ protected:
 public:
     Nivel2(QObject *parent = nullptr);
     void cargar();
+    void mostrarPantallaFinJuego(bool victoria);
+
+private slots:
+    void clickReiniciar();
+    void clickMenuPrincipal();
+    void clickSalir();
 
 public slots:
     void actualizar();
+
+signals:
+    void solicitarMenuPrincipal();
+    void solicitarReiniciarNivel();
 };
 
 #endif // NIVEL2_H

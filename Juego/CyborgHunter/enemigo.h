@@ -16,6 +16,17 @@ private:
     int memoriaJugador;
     bool escudoActivo;
 
+    double distanciaJugador;
+    bool jugadorVeloz;
+    bool jugadorSobrecargado;
+    bool jugadorArriba;
+    bool jugadorAbajo;
+    double ultimaPosYJugador;
+    int contadorDisparosJugador;
+    float tiempoEscudo;
+    float cooldownEscudo;
+    float tiempoOlvido;
+
     QPixmap sprites1;
     QPixmap sprites2;
 
@@ -32,6 +43,9 @@ private:
 
     void cortarHojasSprites();
 
+    bool debeGenerarBalaEnemigo = false;
+    float cooldownDisparoEnemigo = 0.0f;
+
 public:
     Enemigo(double x, double y, int tipo);
 
@@ -47,6 +61,11 @@ public:
     void modificarVida(int cantidad);
     int getVida() const { return vida; }
     bool estaMuerto() const { return (estado == 4); }
+    void registrarImpacto(Jugador *kael);
+    bool disparar();
+    void contraataque();
+    int getFrameActual() const { return frameActual; }
+
 };
 
 #endif // ENEMIGO_H

@@ -16,7 +16,7 @@ Granada::Granada(double x, double y, float vel, float ang, int dmg)
     cicloTerminado = false;
     frameActual = 0;
     contadorAnimacion = 0;
-    velocidadAnimacion = 10;
+    velocidadAnimacion = 20;
 
     hojaCompleta.load(":/Recursos/Sprites/Explosion.png");
     cortarHojaSprites();
@@ -60,9 +60,9 @@ void Granada::mover() {
                 cicloTerminado = true;
             } else {
 
-                setPixmap(framesExplosion[frameActual].scaled(80, 80, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                setPixmap(framesExplosion[frameActual].scaled(200, 200, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
-                setPos(posx - 30, posy - 30);
+                setPos(posx - 100, posy - 100);
             }
         }
         return;
