@@ -407,6 +407,10 @@ void Nivel2::actualizar() {
         }
 
     }
+    if (tiempoRestante <= 0) {
+        mostrarPantallaFinJuego(false);
+        return;
+    }
 }
 
 void Nivel2::spawnearItemAleatorio() {
