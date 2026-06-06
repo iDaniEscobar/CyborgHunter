@@ -13,5 +13,6 @@
         <file>Recursos/Sprites/Items.png</file>
         <file>Recursos/Sprites/Enemigo1.png</file>
         <file>Recursos/Sprites/Enemigo2.png</file>
+        <file>Recursos/Sprites/Bala.png</file>
     </qresource>
 </RCC>

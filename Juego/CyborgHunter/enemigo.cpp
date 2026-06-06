@@ -4,7 +4,7 @@
 #include <cmath>
 
 Enemigo::Enemigo(double x, double y, int tipo)
-    : Personaje(x, y, (tipo == 2 ? 300 : 50), 2.5, "") {
+    : Personaje(x, y, (tipo == 2 ? 200 : 50), 2.5, "") {
 
     tipoMovimiento = tipo;
     daño = (tipoMovimiento == 2) ? 20 : 10;
@@ -70,7 +70,10 @@ void Enemigo::percibir(Jugador *kael) {
 }
 
 void Enemigo::razonar()
-{
+{   if (vida <= 0 || estado == 4) {
+        estado = 4;
+        return;
+    }
 
     if(escudoActivo)
     {
@@ -219,7 +222,7 @@ void Enemigo::actuar(Jugador *kael) {
 
     if (posy < 380) posy = 380;
     if (posy > 490) posy = 490;
-    if (posx > 1150) posx = 1150;
+    if (posx > 950) posx = 950;
     if (posx < 370) posx = 370;
 
     setPos(posx, posy);
@@ -256,7 +259,7 @@ void Enemigo::mover() {
 
 void Enemigo::atacar(Jugador *kael) {
 
-    if (abs(kael->getPosx() - posx) < 50) {
+    if (abs(kael->getPosx() - posx) < 150) {
         kael->modificarVida(-1);
     }
 }
@@ -283,7 +286,7 @@ void Enemigo::modificarVida(int cantidad) {
         qDebug() << "El núcleo del Jefe Final fue liberado.";
     }
 
-    int vidaMaxima = (tipoMovimiento == 2) ? 300 : 50;
+    int vidaMaxima = (tipoMovimiento == 2) ? 200 : 50;
     if (vida > vidaMaxima) vida = vidaMaxima;
 }
 

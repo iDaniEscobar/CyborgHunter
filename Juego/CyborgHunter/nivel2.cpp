@@ -41,8 +41,8 @@ Nivel2::Nivel2(QObject *parent) : QGraphicsScene(parent) {
     proxyVidaJ->setPos(20, 20);
 
     vidaJefe = new QProgressBar();
-    vidaJefe->setRange(0, 300);
-    vidaJefe->setValue(300);
+    vidaJefe->setRange(0, 200);
+    vidaJefe->setValue(200);
 
     vidaJefe->setStyleSheet("QProgressBar {border: 2px solid #aa00ff; text-align: center; background-color: #111; color: white; }"
                             "QProgressBar::chunk { background-color: #8800ff; }");
@@ -50,6 +50,8 @@ Nivel2::Nivel2(QObject *parent) : QGraphicsScene(parent) {
     proxyVidaE = addWidget(vidaJefe);
     proxyVidaE->setPos(1050, 20);
 
+    actualizarBalas();
+    actualizarGranadas();
 
     cargar();
 
@@ -91,6 +93,7 @@ void Nivel2::keyPressEvent(QKeyEvent *event) {
         if (puedeDisparar && balasDisponibles > 0) {
             kael->setEstadoActual(2);
             balasDisponibles--;
+            actualizarBalas();
             puedeDisparar = false;
             contadorCooldown = 2.0;
             qDebug() << "Balas restantes:" << balasDisponibles;
@@ -105,11 +108,12 @@ void Nivel2::keyPressEvent(QKeyEvent *event) {
 
         if (granadasDisponibles > 0) {
             granadasDisponibles--;
+            actualizarGranadas();
 
             if(event->key() == Qt::Key_E){
                 kael->lanzarGranada();
 
-                Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 60.0f, 10);
+                Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 60.0f, 30);
                 addItem(granada);
                 listaProyectiles.append(granada);
 
@@ -119,7 +123,7 @@ void Nivel2::keyPressEvent(QKeyEvent *event) {
             if(event->key() == Qt::Key_R){
                 kael->lanzarGranada();
 
-                Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 45.0f, 10);
+                Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 45.0f, 30);
                 addItem(granada);
                 listaProyectiles.append(granada);
 
@@ -129,7 +133,7 @@ void Nivel2::keyPressEvent(QKeyEvent *event) {
             if(event->key() == Qt::Key_F){
                 kael->lanzarGranada();
 
-                Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 30.0f, 10);
+                Granada *granada = new Granada(kael->getPosx() + 60, kael->getPosy() + 20, 90.0f, 30.0f, 30);
                 addItem(granada);
                 listaProyectiles.append(granada);
 
@@ -213,18 +217,21 @@ void Nivel2::actualizar() {
             Granada *g = dynamic_cast<Granada*>(p);
 
             if (g) {
-                jefe->modificarVida(-g->getDaño());
-                jefe->registrarImpacto(kael);
 
                 g->explosion();
-                removeItem(g);
-                listaProyectiles.removeAt(i);
-                delete g;
-                --i;
+                if (g->pasoSuCiclo()) {
+                    jefe->modificarVida(-g->getDaño());
+                    jefe->registrarImpacto(kael);
+                    removeItem(g);
+                    listaProyectiles.removeAt(i);
+                    delete g;
+                    --i;
+                    continue;
+                }
 
             } else {
 
-                jefe->modificarVida(-25);
+                jefe->modificarVida(-p->getDaño());
                 jefe->registrarImpacto(kael);
 
                 removeItem(p);
@@ -240,7 +247,7 @@ void Nivel2::actualizar() {
 
     if (kael->disparar()) {
 
-        Proyectil *bala = new Proyectil(kael->getPosx() + 80, kael->getPosy() + 45, 15.0, 1.0, 25);
+        Proyectil *bala = new Proyectil(kael->getPosx() + 80, kael->getPosy() + 45, 15.0, 1.0, 20);
         addItem(bala);
         listaProyectiles.append(bala);
 
@@ -277,15 +284,6 @@ void Nivel2::actualizar() {
                 continue;
             }
 
-            /*QList<QGraphicsItem*> choques = g->collidingItems();
-            for (QGraphicsItem *item : choques) {
-                // Revisa si lo que tocó es un enemigo (Asumiendo que tienes una clase Enemigo o Androide)
-                // if (dynamic_cast<Enemigo*>(item)) {
-                //     g->estallar();
-                //     // Aquí le puedes restar vida al enemigo: dynamic_cast<Enemigo*>(item)->restarVida(g->getDaño());
-                //     break;
-                // }
-            }*/
         }
 
         else if (!g) {
@@ -318,6 +316,7 @@ void Nivel2::actualizar() {
         contadorRecarga += dt;
         if (contadorRecarga >= 5.0) {
             balasDisponibles++;
+            actualizarBalas();
             contadorRecarga = 0.0;
             qDebug() << "Munición recargada. Total:" << balasDisponibles;
         }
@@ -330,6 +329,7 @@ void Nivel2::actualizar() {
 
         if (contadorRecargaGranada >= 5.0f) {
             granadasDisponibles++;
+            actualizarGranadas();
             contadorRecargaGranada = 0.0f;
             qDebug() << "Granada regenerada. Total:" << granadasDisponibles;
         }
@@ -354,4 +354,44 @@ void Nivel2::spawnearItemAleatorio() {
     listaItems.append(nuevoItem);
 
     qDebug() << "Item generado en X:" << xAleatoria << " Tipo:" << tipoAleatorio;
+}
+
+void Nivel2::actualizarBalas() {
+    for (auto icono : icnBalas) {
+        removeItem(icono);
+        delete icono;
+    }
+    icnBalas.clear();
+
+    QPixmap spriteBala(":/Recursos/Sprites/Bala.png");
+    QPixmap balaEscalada = spriteBala.scaled(30, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    for (int i = 0; i < balasDisponibles; ++i) {
+        QGraphicsPixmapItem* nuevoIcono = new QGraphicsPixmapItem(balaEscalada);
+
+        nuevoIcono->setPos(20 + (i * 30), 60);
+
+        addItem(nuevoIcono);
+        icnBalas.append(nuevoIcono);
+    }
+}
+
+void Nivel2::actualizarGranadas() {
+    for (auto icono : icnGranadas) {
+        removeItem(icono);
+        delete icono;
+    }
+    icnGranadas.clear();
+
+    QPixmap spriteGranada(":/Recursos/Sprites/Granada.png");
+    QPixmap granadaEscalada = spriteGranada.scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    for (int i = 0; i < granadasDisponibles; ++i) {
+        QGraphicsPixmapItem* nuevoIcono = new QGraphicsPixmapItem(granadaEscalada);
+
+        nuevoIcono->setPos(20 + (i * 50), 100);
+
+        addItem(nuevoIcono);
+        icnGranadas.append(nuevoIcono);
+    }
 }

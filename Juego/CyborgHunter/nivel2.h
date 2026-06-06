@@ -49,6 +49,12 @@ private:
     float cronometroSpawnItem;
     void spawnearItemAleatorio();
 
+    QList<QGraphicsPixmapItem*> icnBalas;
+    QList<QGraphicsPixmapItem*> icnGranadas;
+
+    void actualizarBalas();
+    void actualizarGranadas();
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
