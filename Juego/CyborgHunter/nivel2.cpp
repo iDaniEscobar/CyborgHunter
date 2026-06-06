@@ -497,7 +497,7 @@ void Nivel2::mostrarPantallaFinJuego(bool victoria) {
         textoTitulo->setDefaultTextColor(QColor("#ff0033"));
     }
 
-    QFont fuenteTitulo("Arial", 50, QFont::Bold);
+    QFont fuenteTitulo("Cyber Blast", 70, QFont::Bold);
     textoTitulo->setFont(fuenteTitulo);
 
     textoTitulo->setPos(640 - textoTitulo->boundingRect().width() / 2, 200);

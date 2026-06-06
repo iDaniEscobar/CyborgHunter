@@ -15,5 +15,6 @@
         <file>Recursos/Sprites/Enemigo2.png</file>
         <file>Recursos/Sprites/Bala.png</file>
         <file>Recursos/Sprites/DisparoI.png</file>
+        <file>Recursos/Fuente/CyberBlast.otf</file>
     </qresource>
 </RCC>
