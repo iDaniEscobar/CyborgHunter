@@ -23,6 +23,13 @@ Nivel1::Nivel1(QObject *parent, QString dificultad)
     tiempoRestante = 20.0f;
     nivelTerminado = false;
 
+    sonidoDisparo = new QMediaPlayer(this);
+    salidaAudio = new QAudioOutput(this);
+
+    sonidoDisparo->setAudioOutput(salidaAudio);
+    salidaAudio->setVolume(0.6);
+    sonidoDisparo->setSource(QUrl("qrc:/Recursos/Sonidos/Laser.mp3"));
+
     textoContador = new QGraphicsTextItem();
     textoContador->setPlainText("KILLS: 0");
     textoContador->setDefaultTextColor(QColor("#00f0ff"));
@@ -106,6 +113,11 @@ void Nivel1::actualizarSpritePistola(qreal mouseX) {
 void Nivel1::mousePressEvent(QGraphicsSceneMouseEvent *event) {
     if(nivelTerminado)
         return;
+
+    if (sonidoDisparo->playbackState() == QMediaPlayer::PlayingState) {
+        sonidoDisparo->setPosition(0);
+    }
+    sonidoDisparo->play();
 
     if (!estaDisparando) {
         estaDisparando = true;
@@ -301,4 +313,13 @@ void Nivel1::clickSalir()
     qApp->quit();
 }
 
-Nivel1::~Nivel1() {}
+Nivel1::~Nivel1()
+{
+    qDebug() << "Destruyendo Nivel1";
+
+    if(timerLoop) timerLoop->stop();
+    if(timerSpawn) timerSpawn->stop();
+    if(timerDisparo) timerDisparo->stop();
+
+    qDebug() << "Nivel1 destruido";
+}

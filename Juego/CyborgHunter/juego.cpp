@@ -23,13 +23,16 @@ Juego::Juego(QWidget *parent) : QGraphicsView(parent) {
 }
 
 void Juego::mostrarPortada() {
+
+    unsetCursor();
+
+    if(viewport())
+        viewport()->unsetCursor();
+
+    QApplication::restoreOverrideCursor();
+
     menuEscena = new QGraphicsScene(this);
     menuEscena->setSceneRect(0, 0, 1280, 720);
-
-    this->setCursor(Qt::ArrowCursor);
-    if (this->viewport()) {
-        this->viewport()->setCursor(Qt::ArrowCursor);
-    }
 
     QPixmap imgPortada(":/Recursos/Fondos/Portada.png");
     QPixmap fPortada = imgPortada.scaled(1280, 720, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
@@ -109,6 +112,12 @@ void Juego::clickEnfrentamiento() {
 
 void Juego::reiniciarNivelActual() {
     if (qobject_cast<Nivel1*>(nivelActual)) {
+        if (nivelActual)
+        {
+            nivelActual->deleteLater();
+            nivelActual = nullptr;
+        }
+
         mostrarMenuDificultad();
     }
     else if (qobject_cast<Nivel2*>(nivelActual)) {
@@ -121,10 +130,13 @@ void Juego::volverAlMenu() {
 
     musicaFondo->stop();
     this->setMouseTracking(false);
-    this->setCursor(Qt::ArrowCursor);
-    if (this->viewport()) {
-        this->viewport()->setCursor(Qt::ArrowCursor);
-    }
+
+    unsetCursor();
+
+    if(viewport())
+        viewport()->unsetCursor();
+
+    QApplication::restoreOverrideCursor();
 
     if (nivelActual) {
         nivelActual->deleteLater();
@@ -193,6 +205,28 @@ void Juego::iniciarCampoTiroFacil() {
     setScene(nivelActual);
     this->setMouseTracking(true);
 
+    QPixmap imagenMira(":/Recursos/Sprites/Mira.png");
+    if (!imagenMira.isNull()) {
+        QPixmap miraEscalada = imagenMira.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        int hotspotX = miraEscalada.width() / 2;
+        int hotspotY = miraEscalada.height() / 2;
+        QCursor cursorMira(miraEscalada, hotspotX, hotspotY);
+
+        qDebug() << "Se carga la imagen de la mira y se fuerza a la escena.";
+
+        this->setCursor(cursorMira);
+        nivelActual->setProperty("cursor", QVariant::fromValue(cursorMira));
+
+        QTimer::singleShot(50, this, [this, cursorMira]() {
+            this->setCursor(cursorMira);
+            if(this->viewport()) {
+                this->viewport()->setCursor(cursorMira);
+            }
+        });
+    } else {
+        qDebug() << "No se pudo cargar la imagen de la mira.";
+    }
+
     Nivel1 *n1 = qobject_cast<Nivel1*>(nivelActual);
     if (n1) {
         connect(n1, &Nivel1::solicitarReiniciarNivel, this, &Juego::reiniciarNivelActual);
@@ -212,7 +246,7 @@ void Juego::iniciarCampoTiroDificil() {
 
     QPixmap imagenMira(":/Recursos/Sprites/Mira.png");
     if (!imagenMira.isNull()) {
-        QPixmap miraEscalada = imagenMira.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        QPixmap miraEscalada = imagenMira.scaled(50, 50, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         int hotspotX = miraEscalada.width() / 2;
         int hotspotY = miraEscalada.height() / 2;
         QCursor cursorMira(miraEscalada, hotspotX, hotspotY);

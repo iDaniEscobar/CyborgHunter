@@ -6,6 +6,8 @@
 #include <QTimer>
 #include <QGraphicsTextItem>
 #include <QGraphicsPixmapItem>
+#include <QMediaPlayer>
+#include <QAudioOutput>
 
 class Nivel1 : public QGraphicsScene {
     Q_OBJECT
@@ -57,6 +59,8 @@ private:
 
     void configurarDificultad();
     void actualizarSpritePistola(qreal mouseX);
+    QMediaPlayer *sonidoDisparo;
+    QAudioOutput *salidaAudio;
 };
 
 #endif // NIVEL1_H
