@@ -104,10 +104,7 @@ void Juego::clickEnfrentamiento() {
 
 void Juego::reiniciarNivelActual() {
     if (qobject_cast<Nivel1*>(nivelActual)) {
-
-        QString dif = qobject_cast<Nivel1*>(nivelActual)->property("dificultad").toString();
-        if(dif == "dificil") iniciarCampoTiroDificil();
-        else iniciarCampoTiroFacil();
+        mostrarMenuDificultad();
     }
     else if (qobject_cast<Nivel2*>(nivelActual)) {
         clickEnfrentamiento();

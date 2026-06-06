@@ -21,6 +21,7 @@ private:
     QTimer *timer;
     float tiempoRestante;
     float dt;
+    QGraphicsTextItem *textoTiempo;
 
     Jugador *kael;
     Enemigo *jefe;
@@ -48,6 +49,7 @@ private:
     QList<Item*> listaItems;
     float cronometroSpawnItem;
     void spawnearItemAleatorio();
+
 
     QList<QGraphicsPixmapItem*> icnBalas;
     QList<QGraphicsPixmapItem*> icnGranadas;

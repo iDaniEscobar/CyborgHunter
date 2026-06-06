@@ -14,7 +14,17 @@ Nivel2::Nivel2(QObject *parent) : QGraphicsScene(parent) {
     setSceneRect(0, 0, 1280, 720);
 
     dt = 0.02;
-    tiempoRestante = 90.0;
+    tiempoRestante = 60.0;
+
+    textoTiempo = new QGraphicsTextItem();
+    textoTiempo->setPlainText("TIEMPO: 20");
+    textoTiempo->setDefaultTextColor(Qt::yellow);
+    QFont fuenteTiempo;
+    fuenteTiempo.setPointSize(20);
+    fuenteTiempo.setBold(true);
+    textoTiempo->setFont(fuenteTiempo);
+    textoTiempo->setPos(530,20);
+    addItem(textoTiempo);
 
     teclaW_Presionada = false;
     teclaA_Presionada = false;
@@ -198,6 +208,11 @@ void Nivel2::actualizar() {
         qDebug() << "Se acabo el tiempo.";
 
     }
+
+    textoTiempo->setPlainText(
+        QString("TIEMPO: %1")
+            .arg((int)ceil(tiempoRestante))
+        );
 
     kael->estMvmt(teclaW_Presionada, teclaA_Presionada, teclaS_Presionada, teclaD_Presionada);
     kael->mover();

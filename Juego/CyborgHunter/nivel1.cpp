@@ -80,6 +80,7 @@ void Nivel1::configurarDificultad() {
 }
 
 void Nivel1::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
+    //if (nivelTerminado) return;
     actualizarSpritePistola(event->scenePos().x());
     QGraphicsScene::mouseMoveEvent(event);
 }
@@ -209,7 +210,7 @@ void Nivel1::actualizarJuego() {
                 continue;
             }
 
-            if(cabeza->y() > 750)
+            if(cabeza->y() > 750 || cabeza->x() < -100 || cabeza->x() > 1380)
             {
                 removeItem(cabeza);
                 delete cabeza;
