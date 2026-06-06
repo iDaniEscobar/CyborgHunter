@@ -49,6 +49,7 @@ public:
     int getVida() const { return vida; }
     bool isModoVelozActivo() const { return modoVeloz; }
     bool isModoSobrecargaActivo() const { return modoSobrecarga; }
+    int getFrameActual() const { return frameActual; }
 };
 
 #endif // JUGADOR_H

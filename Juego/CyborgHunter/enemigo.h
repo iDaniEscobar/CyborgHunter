@@ -64,6 +64,7 @@ public:
     void registrarImpacto(Jugador *kael);
     bool disparar();
     void contraataque();
+    int getFrameActual() const { return frameActual; }
 
 };
 

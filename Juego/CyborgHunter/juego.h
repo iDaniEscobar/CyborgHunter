@@ -26,6 +26,8 @@ public:
 
 public slots:
     void iniciarJuego();
+    void reiniciarNivel2();
+    void volverAlMenu();
 };
 
 #endif // JUEGO_H

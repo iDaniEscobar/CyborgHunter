@@ -4,6 +4,11 @@
 #include <QDebug>
 #include <cstdlib>
 #include <ctime>
+#include <QApplication>
+#include <QGraphicsRectItem>
+#include <QGraphicsTextItem>
+#include <QPushButton>
+
 
 Nivel2::Nivel2(QObject *parent) : QGraphicsScene(parent) {
     setSceneRect(0, 0, 1280, 720);
@@ -388,8 +393,20 @@ void Nivel2::actualizar() {
     else if (kael->getVida() == 0){
 
         kael->setEstadoActual(4);
+        if (kael->getFrameActual() == 3) {
+            mostrarPantallaFinJuego(false);
+            return;
+        }
     }
     kael->mover();
+    if (jefe && jefe->getVida() <= 0) {
+
+        if (jefe->getFrameActual() == 3) {
+            mostrarPantallaFinJuego(true);
+            return;
+        }
+
+    }
 }
 
 void Nivel2::spawnearItemAleatorio() {
@@ -442,5 +459,84 @@ void Nivel2::actualizarGranadas() {
 
         addItem(nuevoIcono);
         icnGranadas.append(nuevoIcono);
+    }
+}
+
+void Nivel2::clickReiniciar() {
+    qDebug() << "Nivel2 emite: solicitarReiniciarNivel";
+    emit solicitarReiniciarNivel();
+}
+
+void Nivel2::clickMenuPrincipal() {
+    qDebug() << "Nivel2 emite: solicitarMenuPrincipal";
+    emit solicitarMenuPrincipal();
+}
+
+void Nivel2::clickSalir() {
+    qDebug() << "Cerrando aplicación.";
+    QApplication::quit();
+}
+
+void Nivel2::mostrarPantallaFinJuego(bool victoria) {
+
+    timer->stop();
+
+    QGraphicsRectItem *fondoOscuro = new QGraphicsRectItem(0, 0, 1280, 720);
+    fondoOscuro->setBrush(QBrush(QColor(0, 0, 0, 180)));
+    fondoOscuro->setPen(Qt::NoPen);
+    fondoOscuro->setZValue(10);
+    addItem(fondoOscuro);
+
+
+    QGraphicsTextItem *textoTitulo = new QGraphicsTextItem();
+    if (victoria) {
+        textoTitulo->setPlainText("¡VICTORIA!");
+        textoTitulo->setDefaultTextColor(QColor("#00ff66"));
+    } else {
+        textoTitulo->setPlainText("DERROTA");
+        textoTitulo->setDefaultTextColor(QColor("#ff0033"));
+    }
+
+    QFont fuenteTitulo("Arial", 50, QFont::Bold);
+    textoTitulo->setFont(fuenteTitulo);
+
+    textoTitulo->setPos(640 - textoTitulo->boundingRect().width() / 2, 200);
+    textoTitulo->setZValue(11);
+    addItem(textoTitulo);
+
+    QString estiloBotones = "QPushButton { background-color: #111; color: white; border: 2px solid #aa00ff; "
+                            "border-radius: 5px; font-size: 18px; font-weight: bold; padding: 10px; }"
+                            "QPushButton::hover { background-color: #8800ff; border-color: white; }";
+
+    if (victoria) {
+
+        QPushButton *btnMenu = new QPushButton("Menú Principal");
+        btnMenu->setStyleSheet(estiloBotones);
+        btnMenu->setGeometry(440, 350, 400, 50);
+        QGraphicsProxyWidget *proxyMenu = addWidget(btnMenu);
+        proxyMenu->setZValue(11);
+        connect(btnMenu, &QPushButton::clicked, this, &Nivel2::clickMenuPrincipal);
+
+        QPushButton *btnSalir = new QPushButton("Salir del Juego");
+        btnSalir->setStyleSheet(estiloBotones);
+        btnSalir->setGeometry(440, 430, 400, 50);
+        QGraphicsProxyWidget *proxySalir = addWidget(btnSalir);
+        proxySalir->setZValue(11);
+        connect(btnSalir, &QPushButton::clicked, this, &Nivel2::clickSalir);
+    }
+    else {
+        QPushButton *btnRepetir = new QPushButton("Reintentar Nivel");
+        btnRepetir->setStyleSheet(estiloBotones);
+        btnRepetir->setGeometry(440, 350, 400, 50);
+        QGraphicsProxyWidget *proxyRepetir = addWidget(btnRepetir);
+        proxyRepetir->setZValue(11);
+        connect(btnRepetir, &QPushButton::clicked, this, &Nivel2::clickReiniciar);
+
+        QPushButton *btnMenu = new QPushButton("Menú Principal");
+        btnMenu->setStyleSheet(estiloBotones);
+        btnMenu->setGeometry(440, 430, 400, 50);
+        QGraphicsProxyWidget *proxyMenu = addWidget(btnMenu);
+        proxyMenu->setZValue(11);
+        connect(btnMenu, &QPushButton::clicked, this, &Nivel2::clickMenuPrincipal);
     }
 }

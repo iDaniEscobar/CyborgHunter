@@ -62,9 +62,19 @@ protected:
 public:
     Nivel2(QObject *parent = nullptr);
     void cargar();
+    void mostrarPantallaFinJuego(bool victoria);
+
+private slots:
+    void clickReiniciar();
+    void clickMenuPrincipal();
+    void clickSalir();
 
 public slots:
     void actualizar();
+
+signals:
+    void solicitarMenuPrincipal();
+    void solicitarReiniciarNivel();
 };
 
 #endif // NIVEL2_H
