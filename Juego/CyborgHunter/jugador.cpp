@@ -52,6 +52,26 @@ void Jugador::mover() {
 
     float dt = 0.02;
 
+    if (estadoActual == 4) {
+        contadorAnimacion++;
+
+        if (contadorAnimacion >= (velocidadAnimacion + 4)) {
+            contadorAnimacion = 0;
+
+            if (frameActual < framesMuerte.size() - 1) {
+                frameActual++;
+                setPixmap(framesMuerte[frameActual]);
+                qDebug() << "Reproduciendo frame de muerte de Kael:" << frameActual;
+            }
+            else {
+                setPixmap(framesMuerte[framesMuerte.size() - 1]);
+            }
+        }
+        setPos(posx, posy);
+        actualizar();
+        return;
+    }
+
     if (modoSobrecarga) {
         cronometroSobrecarga -= dt;
 
@@ -73,28 +93,22 @@ void Jugador::mover() {
     }
 
     if (estadoActual == 3) {
-        // 1. Aplicamos la fricción física de tu archivo de físicas para frenar el empujón
+
         Fisicas::resistencia(velocidadX, 0.6f, 80.0f, dt);
         posx += velocidadX * dt * 50;
 
-        // 2. Control del tiempo de los frames de dolor
         contadorAnimacion++;
 
-        // 💡 SOLUCIÓN: Le damos un "freno" multiplicador (+3) a la velocidad de animación
-        // para que cada frame de golpe dure más tiempo expuesto en pantalla.
         if (contadorAnimacion >= (velocidadAnimacion + 3)) {
             contadorAnimacion = 0;
 
-            // Comprobamos si todavía quedan cuadros de dolor por mostrar
             if (frameActual < framesGolpe.size() - 1) {
                 frameActual++;
-                setPixmap(framesGolpe[frameActual]); // Cambia al siguiente frame de dolor
+                setPixmap(framesGolpe[frameActual]);
 
                 qDebug() << "Corriendo frame de golpe de Kael:" << frameActual;
             }
             else {
-                // 🔥 AQUÍ SE DETIENEN: Solo cuando se pintó el ÚLTIMO cuadro (Frame 3)
-                // Kael limpia su inercia y regresa al estado normal de juego.
                 frameActual = 0;
                 estadoActual = 0;
                 velocidadX = 0;
@@ -202,9 +216,20 @@ void Jugador::lanzarGranada() {
 }
 
 void Jugador::modificarVida(int cantidad) {
+
+    if (estadoActual == 4) return;
+
     vida += cantidad;
     if (vida > 100) vida = 100;
     if (vida < 0) vida = 0;
+
+    if (vida == 0) {
+        estadoActual = 4;
+        frameActual = 0;
+        contadorAnimacion = 0;
+        velocidadX = 0;
+        qDebug() << "Kael ha caído en combate. Iniciando framesMuerte...";
+    }
 }
 
 void Jugador::activarSobrecarga() {

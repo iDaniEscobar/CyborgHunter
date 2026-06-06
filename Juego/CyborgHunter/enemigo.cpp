@@ -119,6 +119,7 @@ void Enemigo::razonar()
     }
 
     else if (jugadorSobrecargado || (abs(posy - ultimaPosYJugador) < 80)) {
+        contraataque();
         estado = 5;
     }
 

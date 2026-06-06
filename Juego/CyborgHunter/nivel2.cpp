@@ -382,6 +382,13 @@ void Nivel2::actualizar() {
 
     kael->setEstadoActual(estadoDeMovimiento);
     vidaJugador->setValue(kael->getVida());
+    if (kael->getVida() > 0) {
+        kael->setEstadoActual(estadoDeMovimiento);
+    }
+    else if (kael->getVida() == 0){
+
+        kael->setEstadoActual(4);
+    }
     kael->mover();
 }
 
