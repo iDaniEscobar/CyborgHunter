@@ -19,5 +19,6 @@
         <file>Recursos/Sonidos/Nivel1.mp3</file>
         <file>Recursos/Fondos/Nivel1.png</file>
         <file>Recursos/Sprites/Pistola.png</file>
+        <file>Recursos/Sprites/Robots.png</file>
     </qresource>
 </RCC>

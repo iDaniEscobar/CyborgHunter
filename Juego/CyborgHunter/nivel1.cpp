@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QGraphicsView>
+#include <cabezarobot.h>
 
 Nivel1::Nivel1(QObject *parent, QString dificultad)
     : QGraphicsScene(parent), mododificultad(dificultad) {
@@ -53,7 +54,7 @@ Nivel1::Nivel1(QObject *parent, QString dificultad)
 
 void Nivel1::configurarDificultad() {
     if (mododificultad == "facil") {
-        velocidadBase = 18.0f;
+        velocidadBase = 90.0f;
         factorEscalaSprite = 1.0f;
         intervaloGeneracion = 1800;
     } else {
@@ -99,11 +100,15 @@ void Nivel1::mousePressEvent(QGraphicsSceneMouseEvent *event) {
         QPointF puntoClic = event->scenePos();
         QGraphicsItem *itemClickeado = itemAt(puntoClic, QTransform());
 
-        if (itemClickeado && itemClickeado != spritePistola) {
-
-            cabezasDestruidas++;
-            textoContador->setPlainText(QString("KILLS: %1").arg(cabezasDestruidas));
-            textoContador->setPos(640 - textoContador->boundingRect().width()/2, 20);
+        if (itemClickeado && itemClickeado != spritePistola && itemClickeado->data(0).toString() == "cabeza") {
+            CabezaRobot *robotAfectado = dynamic_cast<CabezaRobot*>(itemClickeado);
+            if (robotAfectado) {
+                if (robotAfectado->recibirDisparo()) {
+                    cabezasDestruidas++;
+                    textoContador->setPlainText(QString("KILLS: %1").arg(cabezasDestruidas));
+                    textoContador->setPos(640 - textoContador->boundingRect().width()/2, 20);
+                }
+            }
         }
     }
     QGraphicsScene::mousePressEvent(event);
@@ -117,7 +122,6 @@ void Nivel1::apagarFogonazo() {
 }
 
 void Nivel1::generarObjetivo() {
-
     int canonSeleccionado = QRandomGenerator::global()->bounded(0, 2);
 
     float xInicial = 0;
@@ -125,22 +129,34 @@ void Nivel1::generarObjetivo() {
     int anguloAleatorio = 0;
 
     if (canonSeleccionado == 0) {
-
         xInicial = 50;
         anguloAleatorio = QRandomGenerator::global()->bounded(30, 75);
+        qDebug() << "Generando cabezaI";
         qDebug() << "CañónI dispara cabeza con ángulo:" << anguloAleatorio;
     } else {
-
         xInicial = 1230;
         anguloAleatorio = QRandomGenerator::global()->bounded(105, 150);
+        qDebug() << "Generando cabezaD";
         qDebug() << "CañónD dispara cabeza con ángulo:" << anguloAleatorio;
     }
 
-
+    CabezaRobot *nuevaCabeza = new CabezaRobot(xInicial, yInicial, velocidadBase, anguloAleatorio, factorEscalaSprite, canonSeleccionado);
+    addItem(nuevaCabeza);
 }
 
 void Nivel1::actualizarJuego() {
+    QList<QGraphicsItem*> itemsEnEscena = items();
+    for (QGraphicsItem *item : itemsEnEscena) {
+        CabezaRobot *cabeza = dynamic_cast<CabezaRobot*>(item);
+        if (cabeza) {
+            cabeza->actualizarPosicion(0.02f);
 
+            if (cabeza->y() > 750) {
+                removeItem(cabeza);
+                delete cabeza;
+            }
+        }
+    }
 }
 
 

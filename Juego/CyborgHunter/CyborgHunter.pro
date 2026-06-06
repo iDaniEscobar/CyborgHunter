@@ -10,6 +10,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    cabezarobot.cpp \
     enemigo.cpp \
     fisicas.cpp \
     granada.cpp \
@@ -24,6 +25,7 @@ SOURCES += \
     proyectil.cpp
 
 HEADERS += \
+    cabezarobot.h \
     enemigo.h \
     fisicas.h \
     granada.h \
