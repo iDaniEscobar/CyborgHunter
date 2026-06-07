@@ -6,8 +6,6 @@
 
 class Jugador : public Personaje {
 private:
-    int chipsRecolectados;
-    int puntos;
     bool modoVeloz;
     float cronometroVeloz;
     bool modoSobrecarga;

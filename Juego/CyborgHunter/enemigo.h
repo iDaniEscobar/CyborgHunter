@@ -1,7 +1,7 @@
 #ifndef ENEMIGO_H
 #define ENEMIGO_H
 
-#include "Personaje.h" // Hereda de tu clase base Personaje
+#include "Personaje.h"
 #include "jugador.h"
 #include <QVector>
 #include <QPixmap>

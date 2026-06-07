@@ -6,8 +6,6 @@ class Proyectil;
 class Nivel2;
 
 Jugador::Jugador(double x, double y) : Personaje(x, y, 100, 5.0, ":/Recursos/Sprites/Kael_Quieto.png"){
-    chipsRecolectados = 0;
-    puntos = 0;
     modoVeloz = false;
     modoSobrecarga = false;
 
@@ -130,7 +128,7 @@ void Jugador::mover() {
             else if (teclaW) posy -= velFinal * dt * 50;
         }
 
-        if (estadoActual != 2 & estadoActual != 3) {
+        if (estadoActual != 2 && estadoActual != 3) {
             if (seEstaMoviendo) {
                 estadoActual = 1;
             } else {
